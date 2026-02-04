@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- PWA Manifest and Meta Tags -->
@@ -1718,7 +1718,7 @@
                     <h3 style="color: white; margin-bottom: var(--space-md); text-align: center;">Join the MealMoment Family</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md);">
                         <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
-                            <i class="fas fa-bike" style="font-size: 2rem; color: var(--mm-orange); margin-bottom: var(--space-sm);"></i>
+                            <img src="image/MealMomentRest.jpeg" alt="Delivery Car" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin-bottom: var(--space-sm);">
                             <h4 style="color: white; margin-bottom: var(--space-xs);">Become a Driver</h4>
                             <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
                                 As a delivery driver, make money and work on your schedule. Sign up in minutes.
@@ -1728,7 +1728,7 @@
                             </a>
                         </div>
                         <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
-                            <i class="fas fa-store" style="font-size: 2rem; color: var(--mm-green); margin-bottom: var(--space-sm);"></i>
+                            <img src="image/GetApp.jpeg" alt="Merchant" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin-bottom: var(--space-sm);">
                             <h4 style="color: white; margin-bottom: var(--space-xs);">Become a Merchant</h4>
                             <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
                                 Attract new customers and grow sales, starting with 0% commissions for up to 30 days.
@@ -1738,7 +1738,7 @@
                             </a>
                         </div>
                         <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
-                            <i class="fas fa-mobile-alt" style="font-size: 2rem; color: var(--mm-orange-2); margin-bottom: var(--space-sm);"></i>
+                            <img src="image/GetApp.jpeg" alt="Mobile App" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin-bottom: var(--space-sm);">
                             <h4 style="color: white; margin-bottom: var(--space-xs);">Get the App</h4>
                             <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
                                 Experience the best your neighborhood has to offer, all in one app.
@@ -2717,14 +2717,14 @@
                 return;
             }
             
-            // Calculate totals
+            // Calculate totals - UPDATED: Changed delivery fee from 2.99 to 5.99
             let subtotal = 0;
             currentCart.forEach(item => {
                 subtotal += item.price * item.quantity;
             });
             
             const tax = subtotal * currentStateTaxRate;
-            const deliveryFee = 2.99;
+            const deliveryFee = 5.99; // UPDATED: Changed from 2.99 to 5.99
             const total = subtotal + tax + deliveryFee;
             
             // Update totals display
@@ -2803,7 +2803,7 @@
             }
         }
 
-        // Process payment and save order to Firebase
+        // Process payment and save order to Firebase - UPDATED: Changed delivery fee from 2.99 to 5.99
         async function processPayment() {
             const name = document.getElementById('name');
             const phone = document.getElementById('phone');
@@ -2848,7 +2848,7 @@
                     })),
                     subtotal: parseFloat(document.getElementById('subtotal').textContent.replace('$', '')),
                     tax: parseFloat(document.getElementById('tax').textContent.replace('$', '')),
-                    deliveryFee: 2.99,
+                    deliveryFee: 5.99, // UPDATED: Changed from 2.99 to 5.99
                     total: parseFloat(document.getElementById('total').textContent.replace('$', '')),
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
