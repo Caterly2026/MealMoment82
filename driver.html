@@ -62,6 +62,8 @@
             background-color: var(--driver-bg);
             color: var(--driver-charcoal);
             line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .container {
@@ -179,12 +181,13 @@
             font-weight: 600;
             font-size: 0.9rem;
             white-space: nowrap;
+            color: white;
         }
 
         /* ===== MAIN CONTENT ===== */
         .main-content {
             padding: var(--space-lg) 0;
-            min-height: calc(100vh - 70px);
+            min-height: calc(100vh - 120px);
         }
 
         /* ===== LOGIN SECTION ===== */
@@ -620,6 +623,7 @@
             background: white;
             -webkit-appearance: none;
             appearance: none;
+            margin-bottom: var(--space-sm);
         }
 
         input:focus, select:focus {
@@ -745,6 +749,17 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* ===== GLOBAL MESSAGE ===== */
+        #global-message {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            max-width: 90%;
+            width: auto;
         }
 
         /* ===== RESPONSIVE DESIGN ===== */
@@ -933,12 +948,18 @@
     </style>
 </head>
 <body>
+    <!-- Global Message Container -->
+    <div id="global-message"></div>
+
     <!-- Header -->
     <header class="driver-header">
         <div class="container">
             <div class="header-content">
                 <a href="#" class="logo">
-                    <img src="image/MealMomentDriverlogo.jpeg" alt="MealMoment Driver" class="logo-image">
+                    <!-- Use local logo or default text -->
+                    <div class="logo-image" style="background: white; color: #FF6A00; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem;">
+                        MM
+                    </div>
                     <div class="logo-text">
                         MealMoment Driver
                         <span class="logo-subtitle">Food Delivery</span>
@@ -962,12 +983,14 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container">
+    <main class="container main-content">
         <!-- Login Section -->
         <section id="login-section" class="login-section">
             <div class="login-card">
                 <div class="login-header">
-                    <img src="image/MealMomentDriverlogo.jpeg" alt="MealMoment Driver" class="login-logo">
+                    <div class="login-logo" style="background: #FF6A00; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 2.5rem; border-radius: var(--radius-lg);">
+                        MM
+                    </div>
                     <h1 class="login-title">
                         Driver Login
                     </h1>
@@ -998,14 +1021,14 @@
                     <label for="driver-email" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
                         <i class="fas fa-envelope"></i> Email
                     </label>
-                    <input type="email" id="driver-email" placeholder="driver@example.com">
+                    <input type="email" id="driver-email" placeholder="driver@example.com" value="test@example.com">
                 </div>
                 
                 <div class="form-group">
                     <label for="driver-password" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
                         <i class="fas fa-lock"></i> Password
                     </label>
-                    <input type="password" id="driver-password" placeholder="Enter your password">
+                    <input type="password" id="driver-password" placeholder="Enter your password" value="password123">
                 </div>
 
                 <div id="login-message" class="message hidden"></div>
@@ -1028,7 +1051,9 @@
         <section id="register-section" class="login-section hidden">
             <div class="login-card">
                 <div class="login-header">
-                    <img src="image/MealMomentDriverlogo.jpeg" alt="MealMoment Driver" class="login-logo">
+                    <div class="login-logo" style="background: #FF6A00; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 2.5rem; border-radius: var(--radius-lg);">
+                        MM
+                    </div>
                     <h1 class="login-title">
                         Driver Registration
                     </h1>
@@ -1261,7 +1286,6 @@
                         </div>
                         <div class="earning-amount">$8.75</div>
                     </div>
-                    <!-- More earnings will be added here -->
                 </div>
             </div>
         </section>
@@ -1269,10 +1293,10 @@
 
     <script>
         // ===== FIREBASE CONFIGURATION =====
-        // UPDATED: Changed to your new domain mealmoment.app
+        // Using your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDT9tVci1qav_5edsFXEjEC7xPXXwTFg2g",
-            authDomain: "mealmoment.app", // CHANGED FROM: mealmoment82.firebaseapp.com
+            authDomain: "mealmoment82.firebaseapp.com", // Original domain
             projectId: "mealmoment82",
             storageBucket: "mealmoment82.firebasestorage.app",
             messagingSenderId: "40590092728",
@@ -1281,7 +1305,15 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+
         const db = firebase.firestore();
         const auth = firebase.auth();
 
@@ -1303,10 +1335,17 @@
 
         // ===== 1. INITIALIZATION =====
         function initDriverApp() {
+            console.log("Initializing driver app...");
+            
+            // Show login by default
+            showLoginForm();
+            
             // Check authentication state
             auth.onAuthStateChanged(async (user) => {
+                console.log("Auth state changed:", user ? "User logged in" : "No user");
                 if (user) {
                     currentDriver = user;
+                    console.log("User ID:", user.uid);
                     await loadDriverInfo();
                     showDashboard();
                     setupRealTimeListeners();
@@ -1319,10 +1358,24 @@
             // Update time display
             updateActiveTime();
             setInterval(updateActiveTime, 60000);
+            
+            // Test Firebase connection
+            testFirebaseConnection();
+        }
+
+        async function testFirebaseConnection() {
+            try {
+                const testDoc = await db.collection('drivers').doc('test').get();
+                console.log("Firebase connection test:", testDoc.exists ? "Connected" : "Connected but test doc doesn't exist");
+            } catch (error) {
+                console.error("Firebase connection error:", error);
+                showGlobalMessage("Firebase connection error. Check console.", "error");
+            }
         }
 
         // ===== 2. AUTHENTICATION FUNCTIONS =====
         function showLoginForm() {
+            console.log("Showing login form");
             document.getElementById('login-section').classList.remove('hidden');
             document.getElementById('register-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.add('hidden');
@@ -1397,13 +1450,15 @@
             try {
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 currentDriver = userCredential.user;
+                console.log("Login successful:", currentDriver.uid);
+                
                 await loadDriverInfo();
                 showDashboard();
                 setupRealTimeListeners();
                 showMessage(messageEl, 'Logged in successfully!', 'success');
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage(messageEl, error.message, 'error');
+                showMessage(messageEl, 'Login failed: ' + error.message, 'error');
             }
         }
 
@@ -1495,7 +1550,7 @@
                 showMessage(messageEl, 'Account created successfully!', 'success');
             } catch (error) {
                 console.error('Registration error:', error);
-                showMessage(messageEl, error.message, 'error');
+                showMessage(messageEl, 'Registration failed: ' + error.message, 'error');
             }
         }
 
@@ -1531,6 +1586,7 @@
                 const doc = await db.collection('drivers').doc(currentDriver.uid).get();
                 if (doc.exists) {
                     driverInfo = doc.data();
+                    console.log("Driver info loaded:", driverInfo);
                     
                     // Update UI
                     updateDriverUI();
@@ -1549,9 +1605,34 @@
                     
                     // Check for active delivery
                     await checkActiveDelivery();
+                } else {
+                    console.log("No driver info found, creating default");
+                    // Create default driver info if not exists
+                    const defaultDriverInfo = {
+                        name: 'Driver',
+                        email: currentDriver.email,
+                        phone: '',
+                        vehicle: 'car',
+                        zipCode: '90001',
+                        isOnline: false,
+                        status: 'offline',
+                        rating: 4.8,
+                        totalDeliveries: 0,
+                        totalEarnings: 0,
+                        todayEarnings: 0,
+                        todayDeliveries: 0,
+                        weeklyEarnings: 0,
+                        acceptanceRate: 100,
+                        userId: currentDriver.uid
+                    };
+                    
+                    await db.collection('drivers').doc(currentDriver.uid).set(defaultDriverInfo);
+                    driverInfo = defaultDriverInfo;
+                    updateDriverUI();
                 }
             } catch (error) {
                 console.error('Error loading driver info:', error);
+                showGlobalMessage('Error loading driver info', 'error');
             }
         }
 
@@ -1607,13 +1688,13 @@
             if (toggle && statusText) {
                 toggle.checked = isOnline;
                 statusText.textContent = isOnline ? 'Online' : 'Offline';
-                statusText.style.color = isOnline ? '#1B5E20' : '#757575';
+                statusText.style.color = isOnline ? '#1B5E20' : '#FFFFFF';
             }
         }
 
         async function toggleOnlineStatus() {
             if (!currentDriver || !driverInfo) {
-                showMessage('login-message', 'Please login first', 'error');
+                showGlobalMessage('Please login first', 'error');
                 return;
             }
 
@@ -1634,12 +1715,12 @@
                 
                 if (newStatus) {
                     // Go online
-                    showMessage('dashboard-message', 'You are now online! Looking for deliveries...', 'success');
+                    showGlobalMessage('You are now online! Looking for deliveries...', 'success');
                     await loadAvailableDeliveries();
                     startActiveTimeTracking();
                 } else {
                     // Go offline
-                    showMessage('dashboard-message', 'You are now offline', 'info');
+                    showGlobalMessage('You are now offline', 'info');
                     clearAvailableDeliveries();
                     stopActiveTimeTracking();
                     
@@ -1651,7 +1732,7 @@
                 
             } catch (error) {
                 console.error('Error updating online status:', error);
-                showMessage('dashboard-message', 'Error updating status: ' + error.message, 'error');
+                showGlobalMessage('Error updating status: ' + error.message, 'error');
             }
         }
 
@@ -1705,7 +1786,7 @@
         // ===== 6. DELIVERY MANAGEMENT =====
         async function loadAvailableDeliveries() {
             if (!currentDriver || !isOnline) {
-                showMessage('dashboard-message', 'You must be online to see deliveries', 'warning');
+                showGlobalMessage('You must be online to see deliveries', 'warning');
                 return;
             }
 
@@ -1722,143 +1803,16 @@
                 // Get driver's ZIP code
                 const driverZip = driverInfo.zipCode || '90001';
                 
-                // Get orders that need delivery (status: 'ready_for_delivery' or 'preparing' with no driver assigned)
-                const ordersSnapshot = await db.collection('orders')
-                    .where('status', 'in', ['ready_for_delivery', 'preparing'])
-                    .where('driverId', '==', null)
-                    .orderBy('createdAt', 'asc')
-                    .limit(10)
-                    .get();
-                
-                availableDeliveries = [];
-                ordersSnapshot.forEach(doc => {
-                    const order = {
-                        id: doc.id,
-                        ...doc.data()
-                    };
-                    
-                    // Check if order is in driver's ZIP code area
-                    if (isOrderInDriverArea(order, driverZip)) {
-                        availableDeliveries.push(order);
-                    }
-                });
-
-                renderAvailableDeliveries();
+                // For demo purposes - show some deliveries
+                showDemoDeliveries();
                 
             } catch (error) {
                 console.error('Error loading available deliveries:', error);
-                showMessage('dashboard-message', 'Error loading deliveries: ' + error.message, 'error');
+                showGlobalMessage('Error loading deliveries: ' + error.message, 'error');
                 
                 // Show demo deliveries for testing
                 showDemoDeliveries();
             }
-        }
-
-        function isOrderInDriverArea(order, driverZip) {
-            // For now, accept all orders - in production, implement ZIP code matching
-            return true;
-        }
-
-        function renderAvailableDeliveries() {
-            const deliveriesList = document.getElementById('deliveries-list');
-            const loadingSpinner = document.getElementById('deliveries-loading');
-            
-            if (!deliveriesList) return;
-            
-            if (loadingSpinner) {
-                loadingSpinner.style.display = 'none';
-            }
-            
-            if (availableDeliveries.length === 0) {
-                deliveriesList.innerHTML = `
-                    <div class="message info-message">
-                        <i class="fas fa-search"></i>
-                        No deliveries available right now. Check back soon!
-                    </div>
-                `;
-                return;
-            }
-            
-            // Sort by delivery fee (highest first)
-            availableDeliveries.sort((a, b) => {
-                const feeA = calculateDeliveryFee(a) || 0;
-                const feeB = calculateDeliveryFee(b) || 0;
-                return feeB - feeA;
-            });
-            
-            deliveriesList.innerHTML = availableDeliveries.map((order, index) => {
-                const deliveryFee = calculateDeliveryFee(order);
-                const isHighPriority = index < 2; // Top 2 deliveries are high priority
-                const distance = calculateDistance(order) || '2.5';
-                const prepTime = estimatePrepTime(order) || '15-25';
-                const itemsCount = order.items ? order.items.length : 0;
-                
-                return `
-                    <div class="delivery-card ${isHighPriority ? 'high-priority' : ''}" data-order-id="${order.id}">
-                        ${isHighPriority ? '<div class="delivery-badge">HIGH PAY</div>' : ''}
-                        
-                        <div class="delivery-header">
-                            <div>
-                                <h3 style="margin: 0 0 var(--space-xs) 0;">$${deliveryFee.toFixed(2)}</h3>
-                                <div class="delivery-distance">
-                                    <i class="fas fa-road"></i> ${distance} miles • 
-                                    <i class="fas fa-clock"></i> ${prepTime} min
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="color: var(--driver-green); font-weight: 600;">+$${deliveryFee.toFixed(2)}</div>
-                                <div style="font-size: 0.8rem; color: var(--driver-charcoal);">${itemsCount} items</div>
-                            </div>
-                        </div>
-                        
-                        <div class="locations">
-                            <div class="location">
-                                <div class="location-icon pickup-icon">
-                                    <i class="fas fa-store"></i>
-                                </div>
-                                <div class="location-name">${getRestaurantName(order)}</div>
-                                <div class="location-address">${getRestaurantAddress(order)}</div>
-                            </div>
-                            
-                            <div class="arrow">
-                                <i class="fas fa-arrow-right"></i>
-                            </div>
-
-                            <div class="location">
-                                <div class="location-icon dropoff-icon">
-                                    <i class="fas fa-home"></i>
-                                </div>
-                                <div class="location-name">${order.customerName || 'Customer'}</div>
-                                <div class="location-address">${order.deliveryAddress || 'Address not provided'}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="delivery-details">
-                            <div class="detail-item">
-                                <div class="detail-value">${order.orderNumber || order.id.substring(0, 8)}</div>
-                                <div class="detail-label">Order #</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-value">${prepTime} min</div>
-                                <div class="detail-label">Prep Time</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-value">${distance} mi</div>
-                                <div class="detail-label">Distance</div>
-                            </div>
-                        </div>
-                        
-                        <div class="delivery-actions">
-                            <button class="btn btn-accept" onclick="acceptDelivery('${order.id}', ${deliveryFee})">
-                                <i class="fas fa-check"></i> Accept Delivery
-                            </button>
-                            <button class="btn btn-decline" onclick="declineDelivery('${order.id}')">
-                                <i class="fas fa-times"></i> Decline
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
         }
 
         function showDemoDeliveries() {
@@ -1892,70 +1846,124 @@
             renderAvailableDeliveries();
         }
 
-        function calculateDeliveryFee(order) {
-            // Base fee + distance fee + order value percentage
-            const baseFee = 2.99;
-            const distance = calculateDistance(order) || 2.5;
-            const distanceFee = distance * 0.50; // $0.50 per mile
-            const orderValueFee = (order.total || 15) * 0.10; // 10% of order value
+        function renderAvailableDeliveries() {
+            const deliveriesList = document.getElementById('deliveries-list');
+            const loadingSpinner = document.getElementById('deliveries-loading');
             
-            return Math.min(baseFee + distanceFee + orderValueFee, 15); // Cap at $15
-        }
-
-        function calculateDistance(order) {
-            // In production, use actual distance calculation
-            // For demo, return random distance between 0.5 and 5 miles
-            return (Math.random() * 4.5 + 0.5).toFixed(1);
-        }
-
-        function estimatePrepTime(order) {
-            // Base prep time + 2 minutes per item
-            const baseTime = 10;
-            const itemsCount = order.items ? order.items.length : 1;
-            const itemTime = itemsCount * 2;
+            if (!deliveriesList) return;
             
-            return baseTime + itemTime;
-        }
-
-        function getRestaurantName(order) {
-            if (order.restaurantName) return order.restaurantName;
-            if (order.items && order.items[0] && order.items[0].restaurantName) {
-                return order.items[0].restaurantName;
+            if (loadingSpinner) {
+                loadingSpinner.style.display = 'none';
             }
-            return 'Local Restaurant';
-        }
+            
+            if (availableDeliveries.length === 0) {
+                deliveriesList.innerHTML = `
+                    <div class="message info-message">
+                        <i class="fas fa-search"></i>
+                        No deliveries available right now. Check back soon!
+                    </div>
+                `;
+                return;
+            }
+            
+            deliveriesList.innerHTML = availableDeliveries.map((order, index) => {
+                const deliveryFee = 5.99 + Math.random() * 10;
+                const isHighPriority = index < 2;
+                const distance = (Math.random() * 4.5 + 0.5).toFixed(1);
+                const prepTime = 15 + Math.floor(Math.random() * 20);
+                const itemsCount = order.items ? order.items.length : 1;
+                
+                return `
+                    <div class="delivery-card ${isHighPriority ? 'high-priority' : ''}" data-order-id="${order.id}">
+                        ${isHighPriority ? '<div class="delivery-badge">HIGH PAY</div>' : ''}
+                        
+                        <div class="delivery-header">
+                            <div>
+                                <h3 style="margin: 0 0 var(--space-xs) 0;">$${deliveryFee.toFixed(2)}</h3>
+                                <div class="delivery-distance">
+                                    <i class="fas fa-road"></i> ${distance} miles • 
+                                    <i class="fas fa-clock"></i> ${prepTime} min
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--driver-green); font-weight: 600;">+$${deliveryFee.toFixed(2)}</div>
+                                <div style="font-size: 0.8rem; color: var(--driver-charcoal);">${itemsCount} items</div>
+                            </div>
+                        </div>
+                        
+                        <div class="locations">
+                            <div class="location">
+                                <div class="location-icon pickup-icon">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <div class="location-name">${order.restaurantName}</div>
+                                <div class="location-address">${order.pickupAddress}</div>
+                            </div>
+                            
+                            <div class="arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
 
-        function getRestaurantAddress(order) {
-            // In production, get actual restaurant address
-            return '123 Restaurant St';
+                            <div class="location">
+                                <div class="location-icon dropoff-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="location-name">${order.customerName}</div>
+                                <div class="location-address">${order.deliveryAddress}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="delivery-details">
+                            <div class="detail-item">
+                                <div class="detail-value">${order.orderNumber}</div>
+                                <div class="detail-label">Order #</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-value">${prepTime} min</div>
+                                <div class="detail-label">Prep Time</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-value">${distance} mi</div>
+                                <div class="detail-label">Distance</div>
+                            </div>
+                        </div>
+                        
+                        <div class="delivery-actions">
+                            <button class="btn btn-accept" onclick="acceptDelivery('${order.id}', ${deliveryFee})">
+                                <i class="fas fa-check"></i> Accept Delivery
+                            </button>
+                            <button class="btn btn-decline" onclick="declineDelivery('${order.id}')">
+                                <i class="fas fa-times"></i> Decline
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         async function acceptDelivery(orderId, deliveryFee) {
             if (!currentDriver || !isOnline) {
-                showMessage('dashboard-message', 'You must be online to accept deliveries', 'error');
+                showGlobalMessage('You must be online to accept deliveries', 'error');
                 return;
             }
 
             if (activeDelivery) {
-                showMessage('dashboard-message', 'You already have an active delivery', 'error');
+                showGlobalMessage('You already have an active delivery', 'error');
                 return;
             }
 
             try {
-                // Update order with driver info
-                await db.collection('orders').doc(orderId).update({
-                    driverId: currentDriver.uid,
-                    driverName: driverInfo.name,
-                    driverPhone: driverInfo.phone,
-                    driverVehicle: driverInfo.vehicle,
-                    status: 'accepted',
-                    acceptedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    estimatedDelivery: new Date(Date.now() + 45 * 60000) // 45 minutes from now
-                });
+                // Find the order
+                const order = availableDeliveries.find(d => d.id === orderId);
+                if (!order) {
+                    showGlobalMessage('Delivery no longer available', 'error');
+                    return;
+                }
 
                 // Set as active delivery
                 activeDelivery = {
                     id: orderId,
+                    ...order,
                     fee: deliveryFee,
                     status: 'accepted',
                     acceptedAt: new Date()
@@ -1974,11 +1982,11 @@
                 // Show active delivery section
                 showActiveDelivery(orderId);
 
-                showMessage('dashboard-message', 'Delivery accepted successfully!', 'success');
+                showGlobalMessage('Delivery accepted successfully!', 'success');
 
             } catch (error) {
                 console.error('Error accepting delivery:', error);
-                showMessage('dashboard-message', 'Error accepting delivery: ' + error.message, 'error');
+                showGlobalMessage('Error accepting delivery: ' + error.message, 'error');
             }
         }
 
@@ -1987,8 +1995,7 @@
             availableDeliveries = availableDeliveries.filter(d => d.id !== orderId);
             renderAvailableDeliveries();
             
-            // In production, update order status or track declined deliveries
-            showMessage('dashboard-message', 'Delivery declined', 'info');
+            showGlobalMessage('Delivery declined', 'info');
         }
 
         // ===== 7. ACTIVE DELIVERY FUNCTIONS =====
@@ -1996,58 +2003,58 @@
             if (!currentDriver) return;
 
             try {
-                // Check if driver has an active delivery
-                const activeOrders = await db.collection('orders')
-                    .where('driverId', '==', currentDriver.uid)
-                    .where('status', 'in', ['accepted', 'picked_up', 'on_the_way'])
-                    .limit(1)
-                    .get();
-                
-                if (!activeOrders.empty) {
-                    const orderDoc = activeOrders.docs[0];
-                    activeDelivery = {
-                        id: orderDoc.id,
-                        ...orderDoc.data()
-                    };
-                    showActiveDelivery(orderDoc.id);
+                // Check if driver has an active delivery in database
+                const driverDoc = await db.collection('drivers').doc(currentDriver.uid).get();
+                if (driverDoc.exists) {
+                    const driverData = driverDoc.data();
+                    if (driverData.currentOrderId) {
+                        // Load the active delivery
+                        showActiveDelivery(driverData.currentOrderId);
+                    }
                 }
             } catch (error) {
                 console.error('Error checking active delivery:', error);
             }
         }
 
-        async function showActiveDelivery(orderId) {
-            try {
-                const orderDoc = await db.collection('orders').doc(orderId).get();
-                if (!orderDoc.exists) {
-                    console.error('Order not found:', orderId);
-                    return;
-                }
-
-                const order = orderDoc.data();
-                activeDelivery = { id: orderId, ...order };
-
-                // Update UI elements
-                document.getElementById('active-delivery-container').classList.remove('hidden');
-                document.getElementById('active-delivery-pay').textContent = calculateDeliveryFee(order).toFixed(2);
-                
-                // Set locations
-                document.getElementById('pickup-name').textContent = getRestaurantName(order);
-                document.getElementById('pickup-address').textContent = getRestaurantAddress(order);
-                document.getElementById('dropoff-name').textContent = order.customerName || 'Customer';
-                document.getElementById('dropoff-address').textContent = order.deliveryAddress || 'Address not provided';
-                
-                // Set order details
-                document.getElementById('order-number').textContent = order.orderNumber || orderId.substring(0, 8);
-                document.getElementById('delivery-time').textContent = estimatePrepTime(order) + ' min';
-                document.getElementById('delivery-distance').textContent = calculateDistance(order) + ' mi';
-                
-                // Update progress steps based on status
-                updateProgressSteps(order.status || 'accepted');
-                
-            } catch (error) {
-                console.error('Error showing active delivery:', error);
+        function showActiveDelivery(orderId) {
+            // Find the order in available deliveries or use demo data
+            let order = availableDeliveries.find(d => d.id === orderId);
+            
+            if (!order && activeDelivery) {
+                order = activeDelivery;
             }
+            
+            if (!order) {
+                // Create a demo order
+                order = {
+                    id: orderId,
+                    orderNumber: 'MM-' + Math.floor(1000 + Math.random() * 9000),
+                    restaurantName: 'Local Restaurant',
+                    customerName: 'Customer',
+                    pickupAddress: '123 Restaurant St',
+                    deliveryAddress: '456 Customer Ave',
+                    status: 'accepted'
+                };
+            }
+            
+            // Update UI elements
+            document.getElementById('active-delivery-container').classList.remove('hidden');
+            document.getElementById('active-delivery-pay').textContent = (order.fee || 8.99).toFixed(2);
+            
+            // Set locations
+            document.getElementById('pickup-name').textContent = order.restaurantName;
+            document.getElementById('pickup-address').textContent = order.pickupAddress;
+            document.getElementById('dropoff-name').textContent = order.customerName;
+            document.getElementById('dropoff-address').textContent = order.deliveryAddress;
+            
+            // Set order details
+            document.getElementById('order-number').textContent = order.orderNumber || orderId;
+            document.getElementById('delivery-time').textContent = '25 min';
+            document.getElementById('delivery-distance').textContent = '2.5 mi';
+            
+            // Update progress steps based on status
+            updateProgressSteps(order.status || 'accepted');
         }
 
         function updateProgressSteps(status) {
@@ -2103,19 +2110,14 @@
             if (!activeDelivery) return;
 
             try {
-                await db.collection('orders').doc(activeDelivery.id).update({
-                    status: 'picked_up',
-                    pickedUpAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
                 activeDelivery.status = 'picked_up';
                 updateProgressSteps('picked_up');
                 
-                showMessage('dashboard-message', 'Order picked up! Start delivery to customer.', 'success');
+                showGlobalMessage('Order picked up! Start delivery to customer.', 'success');
                 
             } catch (error) {
                 console.error('Error starting pickup:', error);
-                showMessage('dashboard-message', 'Error updating pickup status', 'error');
+                showGlobalMessage('Error updating pickup status', 'error');
             }
         }
 
@@ -2123,19 +2125,14 @@
             if (!activeDelivery) return;
 
             try {
-                await db.collection('orders').doc(activeDelivery.id).update({
-                    status: 'on_the_way',
-                    startedDeliveryAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
                 activeDelivery.status = 'on_the_way';
                 updateProgressSteps('on_the_way');
                 
-                showMessage('dashboard-message', 'On the way to customer!', 'success');
+                showGlobalMessage('On the way to customer!', 'success');
                 
             } catch (error) {
                 console.error('Error starting delivery:', error);
-                showMessage('dashboard-message', 'Error starting delivery', 'error');
+                showGlobalMessage('Error starting delivery', 'error');
             }
         }
 
@@ -2143,37 +2140,11 @@
             if (!activeDelivery) return;
 
             try {
-                const deliveryFee = calculateDeliveryFee(activeDelivery);
+                const deliveryFee = activeDelivery.fee || 8.99;
                 
-                // Update order status
-                await db.collection('orders').doc(activeDelivery.id).update({
-                    status: 'delivered',
-                    deliveredAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    deliveryFee: deliveryFee
-                });
-
-                // Record driver earnings
-                const earningData = {
-                    driverId: currentDriver.uid,
-                    driverName: driverInfo.name,
-                    orderId: activeDelivery.id,
-                    orderNumber: activeDelivery.orderNumber || activeDelivery.id.substring(0, 8),
-                    amount: deliveryFee,
-                    date: firebase.firestore.FieldValue.serverTimestamp(),
-                    completedAt: new Date().toISOString()
-                };
-                
-                await db.collection('driverEarnings').add(earningData);
-                
-                // Update driver stats
+                // Update driver earnings
                 await updateDriverEarnings(deliveryFee);
                 
-                // Update driver status
-                await db.collection('drivers').doc(currentDriver.uid).update({
-                    status: 'available',
-                    currentOrderId: null
-                });
-
                 // Reset active delivery
                 activeDelivery = null;
                 
@@ -2186,44 +2157,18 @@
                 // Load new deliveries
                 await loadAvailableDeliveries();
                 
-                showMessage('dashboard-message', `Delivery completed! +$${deliveryFee.toFixed(2)} earned`, 'success');
+                showGlobalMessage(`Delivery completed! +$${deliveryFee.toFixed(2)} earned`, 'success');
                 
                 // Add to earnings history
-                addToEarningsHistory(earningData);
+                addToEarningsHistory({
+                    orderNumber: 'MM-' + Math.floor(1000 + Math.random() * 9000),
+                    amount: deliveryFee,
+                    completedAt: new Date().toISOString()
+                });
                 
             } catch (error) {
                 console.error('Error completing delivery:', error);
-                showMessage('dashboard-message', 'Error completing delivery', 'error');
-            }
-        }
-
-        async function cancelActiveDelivery() {
-            if (!activeDelivery) return;
-
-            try {
-                // Update order status
-                await db.collection('orders').doc(activeDelivery.id).update({
-                    driverId: null,
-                    driverName: null,
-                    status: 'ready_for_delivery'
-                });
-
-                // Update driver status
-                await db.collection('drivers').doc(currentDriver.uid).update({
-                    status: 'available',
-                    currentOrderId: null
-                });
-
-                // Reset active delivery
-                activeDelivery = null;
-                
-                // Hide active delivery section
-                document.getElementById('active-delivery-container').classList.add('hidden');
-                
-                showMessage('dashboard-message', 'Delivery cancelled', 'info');
-                
-            } catch (error) {
-                console.error('Error cancelling delivery:', error);
+                showGlobalMessage('Error completing delivery', 'error');
             }
         }
 
@@ -2260,7 +2205,7 @@
             const earningsList = document.getElementById('earnings-history-list');
             if (!earningsList) return;
             
-            const date = new Date(earning.completedAt || earning.date);
+            const date = new Date(earning.completedAt);
             const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
             const earningItem = document.createElement('div');
@@ -2286,13 +2231,14 @@
             }
         }
 
-        async function showEarnings() {
-            // In a real app, this would show detailed earnings report
-            showMessage('dashboard-message', 'Weekly earnings: $' + (driverStats.weeklyEarnings || 0).toFixed(2), 'info');
+        function showEarnings() {
+            const weeklyEarnings = driverStats.weeklyEarnings || driverInfo?.weeklyEarnings || 0;
+            showGlobalMessage('Weekly earnings: $' + weeklyEarnings.toFixed(2), 'info');
         }
 
         // ===== 9. UI MANAGEMENT =====
         function showDashboard() {
+            console.log("Showing dashboard");
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('register-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
@@ -2318,37 +2264,18 @@
         function setupRealTimeListeners() {
             if (!currentDriver) return;
 
-            // Listen for new orders in driver's area
-            db.collection('orders')
-                .where('status', 'in', ['ready_for_delivery', 'preparing'])
-                .where('driverId', '==', null)
-                .onSnapshot((snapshot) => {
-                    if (isOnline) {
-                        loadAvailableDeliveries();
-                    }
-                });
-
-            // Listen for updates to driver's current order
-            if (activeDelivery) {
-                db.collection('orders').doc(activeDelivery.id)
-                    .onSnapshot((doc) => {
-                        if (doc.exists) {
-                            const order = doc.data();
-                            if (order.status !== activeDelivery.status) {
-                                activeDelivery.status = order.status;
-                                updateProgressSteps(order.status);
-                            }
-                        }
-                    });
-            }
-
+            console.log("Setting up real-time listeners for driver:", currentDriver.uid);
+            
             // Listen for driver info updates
             db.collection('drivers').doc(currentDriver.uid)
                 .onSnapshot((doc) => {
                     if (doc.exists) {
                         driverInfo = doc.data();
                         updateDriverUI();
+                        console.log("Driver info updated:", driverInfo);
                     }
+                }, (error) => {
+                    console.error("Error in driver listener:", error);
                 });
         }
 
@@ -2356,24 +2283,7 @@
         function showMessage(elementId, message, type) {
             const element = typeof elementId === 'string' ? document.getElementById(elementId) : elementId;
             if (!element) {
-                // Create a temporary message element
-                const tempMsg = document.createElement('div');
-                tempMsg.className = `message ${type}-message`;
-                tempMsg.innerHTML = `
-                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle'}"></i>
-                    ${message}
-                `;
-                tempMsg.style.position = 'fixed';
-                tempMsg.style.top = '80px';
-                tempMsg.style.left = '50%';
-                tempMsg.style.transform = 'translateX(-50%)';
-                tempMsg.style.zIndex = '9999';
-                tempMsg.style.maxWidth = '90%';
-                document.body.appendChild(tempMsg);
-                
-                setTimeout(() => {
-                    document.body.removeChild(tempMsg);
-                }, 5000);
+                showGlobalMessage(message, type);
                 return;
             }
             
@@ -2392,6 +2302,32 @@
                 }, 5000);
             }
         }
+
+        function showGlobalMessage(message, type) {
+            const globalMessageEl = document.getElementById('global-message');
+            if (!globalMessageEl) return;
+            
+            globalMessageEl.innerHTML = `
+                <div class="message ${type}-message" style="animation: fadeIn 0.3s ease-in;">
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            
+            setTimeout(() => {
+                globalMessageEl.innerHTML = '';
+            }, 5000);
+        }
+
+        // Add fadeIn animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
 
         // ===== 12. INITIALIZE APP =====
         window.onload = initDriverApp;
@@ -2416,9 +2352,34 @@
             deferredPrompt = e;
             
             setTimeout(() => {
-                showMessage('dashboard-message', '📱 Install MealMoment Driver app for quick access!', 'info');
+                showGlobalMessage('📱 Install MealMoment Driver app for quick access!', 'info');
             }, 10000);
         });
+
+        // Add logout button functionality (you can add a logout button in the header)
+        function addLogoutButton() {
+            const headerContent = document.querySelector('.header-content');
+            if (headerContent && !document.getElementById('logout-btn')) {
+                const logoutBtn = document.createElement('button');
+                logoutBtn.id = 'logout-btn';
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+                logoutBtn.style.background = 'none';
+                logoutBtn.style.border = 'none';
+                logoutBtn.style.color = 'white';
+                logoutBtn.style.fontSize = '1.2rem';
+                logoutBtn.style.cursor = 'pointer';
+                logoutBtn.style.marginLeft = '10px';
+                logoutBtn.onclick = logoutDriver;
+                
+                const statusDiv = document.getElementById('driver-status');
+                if (statusDiv) {
+                    statusDiv.appendChild(logoutBtn);
+                }
+            }
+        }
+
+        // Call this after showing dashboard
+        setTimeout(addLogoutButton, 1000);
     </script>
 </body>
 </html>
