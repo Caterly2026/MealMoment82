@@ -1269,14 +1269,15 @@
 
     <script>
         // ===== FIREBASE CONFIGURATION =====
-        // Same configuration as your other files
+        // Updated with your new Firebase config
         const firebaseConfig = {
-            apiKey: "AIzaSyBlBzb_M6uJwnMHXwv3dz4N5M08Tdk51gg",
-            authDomain: "mealmoment786.firebaseapp.com",
-            projectId: "mealmoment786",
-            storageBucket: "mealmoment786.firebasestorage.app",
-            messagingSenderId: "707371774233",
-            appId: "1:707371774233:web:a94c816e40f8d0a9055588"
+            apiKey: "AIzaSyDT9tVci1qav_5edsFXEjEC7xPXXwTFg2g",
+            authDomain: "mealmoment82.firebaseapp.com",
+            projectId: "mealmoment82",
+            storageBucket: "mealmoment82.firebasestorage.app",
+            messagingSenderId: "40590092728",
+            appId: "1:40590092728:web:0aa8ba4a6aec1f5c25474d",
+            measurementId: "G-0SSF0NMKFV"
         };
 
         // Initialize Firebase
@@ -1360,6 +1361,10 @@
                         rating: 4.8,
                         totalDeliveries: 0,
                         totalEarnings: 0,
+                        todayEarnings: 0,
+                        todayDeliveries: 0,
+                        weeklyEarnings: 0,
+                        acceptanceRate: 100,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         userId: currentDriver.uid
                     };
@@ -2421,4 +2426,3 @@
     </script>
 </body>
 </html>
-
