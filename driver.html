@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- PWA Manifest for Drivers -->
-    <link rel="manifest" href="manifest-driver.json">
-    <meta name="theme-color" content="#FF6A00">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMoment Driver - Food Delivery</title>
@@ -15,11 +8,54 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDK v9 compat (works with your config) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <!-- Firebase SDK v9 (Modular version) -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDT9tVci1qav_5edsFXEjEC7xPXXwTFg2g",
+            authDomain: "mealmoment82.firebaseapp.com",
+            projectId: "mealmoment82",
+            storageBucket: "mealmoment82.firebasestorage.app",
+            messagingSenderId: "40590092728",
+            appId: "1:40590092728:web:0aa8ba4a6aec1f5c25474d",
+            measurementId: "G-0SSF0NMKFV"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Make Firebase available globally
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.firebaseCreateUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.firebaseSignInWithPopup = signInWithPopup;
+        window.firebaseGoogleAuthProvider = GoogleAuthProvider;
+        window.firebaseOnAuthStateChanged = onAuthStateChanged;
+        window.firebaseSignOut = signOut;
+        window.firebaseDoc = doc;
+        window.firebaseSetDoc = setDoc;
+        window.firebaseGetDoc = getDoc;
+        window.firebaseUpdateDoc = updateDoc;
+        window.firebaseCollection = collection;
+        window.firebaseQuery = query;
+        window.firebaseWhere = where;
+        window.firebaseGetDocs = getDocs;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseServerTimestamp = serverTimestamp;
+        window.firebaseIncrement = increment;
+        
+        console.log("Firebase initialized successfully");
+    </script>
+    
     <style>
         /* ===== CSS VARIABLES ===== */
         :root {
@@ -63,7 +99,6 @@
             color: var(--driver-charcoal);
             line-height: 1.6;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         .container {
@@ -99,9 +134,16 @@
 
         .logo-image {
             height: 45px;
-            width: auto;
-            object-fit: contain;
+            width: 45px;
+            background: white;
+            color: #FF6A00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
             border-radius: var(--radius-sm);
+            font-family: var(--font-heading);
         }
 
         .logo-text {
@@ -213,12 +255,17 @@
 
         .login-logo {
             height: 100px;
-            width: auto;
-            margin-bottom: 20px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            object-fit: contain;
+            width: 100px;
+            background: #FF6A00;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 2.5rem;
+            border-radius: var(--radius-lg);
+            margin: 0 auto var(--space-md) auto;
+            font-family: var(--font-heading);
         }
 
         .login-title {
@@ -799,8 +846,9 @@
             }
             
             .login-logo {
-                height: 90px;
-                margin-bottom: 15px;
+                height: 80px;
+                width: 80px;
+                font-size: 2rem;
             }
             
             .login-title {
@@ -817,6 +865,7 @@
             
             .logo-image {
                 height: 40px;
+                width: 40px;
             }
             
             .toggle-switch {
@@ -846,8 +895,9 @@
             }
             
             .login-logo {
-                height: 80px;
-                margin-bottom: 12px;
+                height: 70px;
+                width: 70px;
+                font-size: 1.8rem;
             }
             
             .login-title {
@@ -884,6 +934,7 @@
             
             .logo-image {
                 height: 35px;
+                width: 35px;
             }
             
             .header-content {
@@ -898,52 +949,10 @@
             }
         }
 
-        @media (max-width: 360px) {
-            .container {
-                padding: 0 0.75rem;
-            }
-            
-            .login-card {
-                padding: var(--space-md);
-            }
-            
-            .login-logo {
-                height: 75px;
-                margin-bottom: 10px;
-            }
-            
-            .login-title {
-                font-size: 1.3rem;
-            }
-            
-            .today-earnings {
-                font-size: 2rem;
-            }
-            
-            .stat-number {
-                font-size: 1.25rem;
-            }
-            
-            .logo-image {
-                height: 30px;
-            }
-        }
-
-        /* ===== SAFE AREAS FOR NOTCHED DEVICES ===== */
-        @supports(padding: max(0px)) {
-            .container {
-                padding-left: max(var(--space-md), env(safe-area-inset-left));
-                padding-right: max(var(--space-md), env(safe-area-inset-right));
-            }
-            
-            .driver-header {
-                padding-top: max(var(--space-sm), env(safe-area-inset-top));
-                padding-bottom: var(--space-sm);
-            }
-            
-            .main-content {
-                padding-bottom: max(var(--space-lg), env(safe-area-inset-bottom));
-            }
+        /* Add fadeIn animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -956,10 +965,7 @@
         <div class="container">
             <div class="header-content">
                 <a href="#" class="logo">
-                    <!-- Use local logo or default text -->
-                    <div class="logo-image" style="background: white; color: #FF6A00; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem;">
-                        MM
-                    </div>
+                    <div class="logo-image">MM</div>
                     <div class="logo-text">
                         MealMoment Driver
                         <span class="logo-subtitle">Food Delivery</span>
@@ -988,9 +994,7 @@
         <section id="login-section" class="login-section">
             <div class="login-card">
                 <div class="login-header">
-                    <div class="login-logo" style="background: #FF6A00; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 2.5rem; border-radius: var(--radius-lg);">
-                        MM
-                    </div>
+                    <div class="login-logo">MM</div>
                     <h1 class="login-title">
                         Driver Login
                     </h1>
@@ -1021,14 +1025,14 @@
                     <label for="driver-email" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
                         <i class="fas fa-envelope"></i> Email
                     </label>
-                    <input type="email" id="driver-email" placeholder="driver@example.com" value="test@example.com">
+                    <input type="email" id="driver-email" placeholder="driver@example.com">
                 </div>
                 
                 <div class="form-group">
                     <label for="driver-password" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
                         <i class="fas fa-lock"></i> Password
                     </label>
-                    <input type="password" id="driver-password" placeholder="Enter your password" value="password123">
+                    <input type="password" id="driver-password" placeholder="Enter your password">
                 </div>
 
                 <div id="login-message" class="message hidden"></div>
@@ -1051,9 +1055,7 @@
         <section id="register-section" class="login-section hidden">
             <div class="login-card">
                 <div class="login-header">
-                    <div class="login-logo" style="background: #FF6A00; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 2.5rem; border-radius: var(--radius-lg);">
-                        MM
-                    </div>
+                    <div class="login-logo">MM</div>
                     <h1 class="login-title">
                         Driver Registration
                     </h1>
@@ -1292,46 +1294,12 @@
     </main>
 
     <script>
-        // ===== FIREBASE CONFIGURATION =====
-        // Using your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDT9tVci1qav_5edsFXEjEC7xPXXwTFg2g",
-            authDomain: "mealmoment82.firebaseapp.com", // Original domain
-            projectId: "mealmoment82",
-            storageBucket: "mealmoment82.firebasestorage.app",
-            messagingSenderId: "40590092728",
-            appId: "1:40590092728:web:0aa8ba4a6aec1f5c25474d",
-            measurementId: "G-0SSF0NMKFV"
-        };
-
-        // Initialize Firebase
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            console.log("Firebase initialized successfully");
-        } catch (error) {
-            console.error("Firebase initialization error:", error);
-        }
-
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-
-        // Global Variables
+        // ===== GLOBAL VARIABLES =====
         let currentDriver = null;
         let driverInfo = null;
         let isOnline = false;
         let activeDelivery = null;
         let availableDeliveries = [];
-        let driverStats = {
-            todayEarnings: 0,
-            weeklyEarnings: 0,
-            totalDeliveries: 0,
-            rating: 4.8,
-            acceptanceRate: 100,
-            todayDeliveries: 0,
-            activeTime: 0
-        };
 
         // ===== 1. INITIALIZATION =====
         function initDriverApp() {
@@ -1340,37 +1308,31 @@
             // Show login by default
             showLoginForm();
             
-            // Check authentication state
-            auth.onAuthStateChanged(async (user) => {
-                console.log("Auth state changed:", user ? "User logged in" : "No user");
-                if (user) {
-                    currentDriver = user;
-                    console.log("User ID:", user.uid);
-                    await loadDriverInfo();
-                    showDashboard();
-                    setupRealTimeListeners();
+            // Wait for Firebase to load
+            setTimeout(() => {
+                if (window.firebaseOnAuthStateChanged) {
+                    // Check authentication state
+                    window.firebaseOnAuthStateChanged(window.firebaseAuth, async (user) => {
+                        console.log("Auth state changed:", user ? "User logged in" : "No user");
+                        if (user) {
+                            currentDriver = user;
+                            console.log("User ID:", user.uid);
+                            await loadDriverInfo();
+                            showDashboard();
+                        } else {
+                            currentDriver = null;
+                            showLogin();
+                        }
+                    });
                 } else {
-                    currentDriver = null;
+                    console.error("Firebase not loaded yet");
                     showLogin();
                 }
-            });
-
+            }, 1000);
+            
             // Update time display
             updateActiveTime();
             setInterval(updateActiveTime, 60000);
-            
-            // Test Firebase connection
-            testFirebaseConnection();
-        }
-
-        async function testFirebaseConnection() {
-            try {
-                const testDoc = await db.collection('drivers').doc('test').get();
-                console.log("Firebase connection test:", testDoc.exists ? "Connected" : "Connected but test doc doesn't exist");
-            } catch (error) {
-                console.error("Firebase connection error:", error);
-                showGlobalMessage("Firebase connection error. Check console.", "error");
-            }
         }
 
         // ===== 2. AUTHENTICATION FUNCTIONS =====
@@ -1395,13 +1357,13 @@
 
         async function signInWithGoogle() {
             try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                const result = await auth.signInWithPopup(provider);
+                const provider = new window.firebaseGoogleAuthProvider();
+                const result = await window.firebaseSignInWithPopup(window.firebaseAuth, provider);
                 currentDriver = result.user;
                 
                 // Check if driver info exists
-                const driverDoc = await db.collection('drivers').doc(currentDriver.uid).get();
-                if (!driverDoc.exists) {
+                const driverDoc = await window.firebaseGetDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid));
+                if (!driverDoc.exists()) {
                     // Create driver info for new Google user
                     const driverData = {
                         name: result.user.displayName || 'Driver',
@@ -1414,11 +1376,11 @@
                         rating: 4.8,
                         totalDeliveries: 0,
                         totalEarnings: 0,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        createdAt: window.firebaseServerTimestamp(),
                         userId: currentDriver.uid
                     };
                     
-                    await db.collection('drivers').doc(currentDriver.uid).set(driverData);
+                    await window.firebaseSetDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid), driverData);
                     driverInfo = driverData;
                 } else {
                     driverInfo = driverDoc.data();
@@ -1426,7 +1388,6 @@
                 
                 showDashboard();
                 await loadDriverInfo();
-                setupRealTimeListeners();
                 
                 showMessage('login-message', 'Signed in with Google successfully!', 'success');
             } catch (error) {
@@ -1448,13 +1409,12 @@
             showMessage(messageEl, 'Logging in...', 'info');
 
             try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const userCredential = await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, email, password);
                 currentDriver = userCredential.user;
                 console.log("Login successful:", currentDriver.uid);
                 
                 await loadDriverInfo();
                 showDashboard();
-                setupRealTimeListeners();
                 showMessage(messageEl, 'Logged in successfully!', 'success');
             } catch (error) {
                 console.error('Login error:', error);
@@ -1517,7 +1477,7 @@
 
             try {
                 // Create user account
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const userCredential = await window.firebaseCreateUserWithEmailAndPassword(window.firebaseAuth, email, password);
                 currentDriver = userCredential.user;
                 
                 // Create driver info
@@ -1536,16 +1496,15 @@
                     todayDeliveries: 0,
                     weeklyEarnings: 0,
                     acceptanceRate: 100,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdAt: window.firebaseServerTimestamp(),
                     userId: currentDriver.uid
                 };
                 
-                await db.collection('drivers').doc(currentDriver.uid).set(driverData);
+                await window.firebaseSetDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid), driverData);
                 driverInfo = driverData;
                 
                 showDashboard();
                 await loadDriverInfo();
-                setupRealTimeListeners();
                 
                 showMessage(messageEl, 'Account created successfully!', 'success');
             } catch (error) {
@@ -1566,7 +1525,7 @@
                 toggleOnlineStatus();
             }
             
-            auth.signOut()
+            window.firebaseSignOut(window.firebaseAuth)
                 .then(() => {
                     currentDriver = null;
                     driverInfo = null;
@@ -1583,8 +1542,8 @@
             if (!currentDriver) return;
 
             try {
-                const doc = await db.collection('drivers').doc(currentDriver.uid).get();
-                if (doc.exists) {
+                const doc = await window.firebaseGetDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid));
+                if (doc.exists()) {
                     driverInfo = doc.data();
                     console.log("Driver info loaded:", driverInfo);
                     
@@ -1594,9 +1553,6 @@
                     // Update online status
                     isOnline = driverInfo.isOnline || false;
                     updateOnlineToggle();
-                    
-                    // Load stats
-                    await loadDriverStats();
                     
                     // Load available deliveries if online
                     if (isOnline) {
@@ -1626,13 +1582,13 @@
                         userId: currentDriver.uid
                     };
                     
-                    await db.collection('drivers').doc(currentDriver.uid).set(defaultDriverInfo);
+                    await window.firebaseSetDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid), defaultDriverInfo);
                     driverInfo = defaultDriverInfo;
                     updateDriverUI();
                 }
             } catch (error) {
                 console.error('Error loading driver info:', error);
-                showGlobalMessage('Error loading driver info', 'error');
+                showGlobalMessage('Error loading driver info: ' + error.message, 'error');
             }
         }
 
@@ -1650,34 +1606,6 @@
             document.getElementById('total-deliveries').textContent = driverInfo.totalDeliveries || 0;
             document.getElementById('rating').textContent = (driverInfo.rating || 4.8).toFixed(1);
             document.getElementById('acceptance-rate').textContent = `${driverInfo.acceptanceRate || 100}%`;
-        }
-
-        async function loadDriverStats() {
-            if (!currentDriver) return;
-
-            try {
-                // Calculate weekly earnings (last 7 days)
-                const sevenDaysAgo = new Date();
-                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                
-                const earningsSnapshot = await db.collection('driverEarnings')
-                    .where('driverId', '==', currentDriver.uid)
-                    .where('date', '>=', sevenDaysAgo)
-                    .get();
-                
-                let weeklyTotal = 0;
-                earningsSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    weeklyTotal += data.amount || 0;
-                });
-                
-                driverStats.weeklyEarnings = weeklyTotal;
-                
-                // Update UI
-                updateDriverUI();
-            } catch (error) {
-                console.error('Error loading driver stats:', error);
-            }
         }
 
         // ===== 4. ONLINE/OFFLINE STATUS =====
@@ -1701,10 +1629,10 @@
             const newStatus = !isOnline;
             
             try {
-                await db.collection('drivers').doc(currentDriver.uid).update({
+                await window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid), {
                     isOnline: newStatus,
                     status: newStatus ? 'available' : 'offline',
-                    lastOnline: firebase.firestore.FieldValue.serverTimestamp()
+                    lastOnline: window.firebaseServerTimestamp()
                 });
                 
                 isOnline = newStatus;
@@ -1744,7 +1672,7 @@
             if (activeTimeInterval) clearInterval(activeTimeInterval);
             
             activeTimeStart = new Date();
-            activeTimeInterval = setInterval(updateActiveTime, 60000); // Update every minute
+            activeTimeInterval = setInterval(updateActiveTime, 60000);
         }
 
         function stopActiveTimeTracking() {
@@ -1753,13 +1681,12 @@
                 activeTimeInterval = null;
             }
             
-            // Save active time to Firebase
             if (activeTimeStart && currentDriver) {
                 const activeMinutes = Math.floor((new Date() - activeTimeStart) / 60000);
                 if (activeMinutes > 0) {
                     // Update driver's active time in Firebase
-                    db.collection('drivers').doc(currentDriver.uid).update({
-                        totalActiveTime: firebase.firestore.FieldValue.increment(activeMinutes)
+                    window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid), {
+                        totalActiveTime: window.firebaseIncrement(activeMinutes)
                     });
                 }
             }
@@ -1779,8 +1706,6 @@
             if (activeTimeDisplay) {
                 activeTimeDisplay.textContent = `${hours}h ${minutes}m`;
             }
-            
-            driverStats.activeTime = diffMinutes;
         }
 
         // ===== 6. DELIVERY MANAGEMENT =====
@@ -1799,20 +1724,8 @@
                 loadingSpinner.style.display = 'flex';
             }
 
-            try {
-                // Get driver's ZIP code
-                const driverZip = driverInfo.zipCode || '90001';
-                
-                // For demo purposes - show some deliveries
-                showDemoDeliveries();
-                
-            } catch (error) {
-                console.error('Error loading available deliveries:', error);
-                showGlobalMessage('Error loading deliveries: ' + error.message, 'error');
-                
-                // Show demo deliveries for testing
-                showDemoDeliveries();
-            }
+            // Show demo deliveries
+            showDemoDeliveries();
         }
 
         function showDemoDeliveries() {
@@ -1970,7 +1883,7 @@
                 };
 
                 // Update driver status
-                await db.collection('drivers').doc(currentDriver.uid).update({
+                await window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid), {
                     status: 'on_delivery',
                     currentOrderId: orderId
                 });
@@ -2004,8 +1917,8 @@
 
             try {
                 // Check if driver has an active delivery in database
-                const driverDoc = await db.collection('drivers').doc(currentDriver.uid).get();
-                if (driverDoc.exists) {
+                const driverDoc = await window.firebaseGetDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid));
+                if (driverDoc.exists()) {
                     const driverData = driverDoc.data();
                     if (driverData.currentOrderId) {
                         // Load the active delivery
@@ -2152,7 +2065,7 @@
                 document.getElementById('active-delivery-container').classList.add('hidden');
                 
                 // Update stats
-                await loadDriverStats();
+                updateDriverUI();
                 
                 // Load new deliveries
                 await loadAvailableDeliveries();
@@ -2172,20 +2085,19 @@
             }
         }
 
-        // ===== 8. EARNINGS MANAGEMENT =====
         async function updateDriverEarnings(amount) {
             if (!currentDriver) return;
 
             try {
                 const updateData = {
-                    totalEarnings: firebase.firestore.FieldValue.increment(amount),
-                    todayEarnings: firebase.firestore.FieldValue.increment(amount),
-                    weeklyEarnings: firebase.firestore.FieldValue.increment(amount),
-                    totalDeliveries: firebase.firestore.FieldValue.increment(1),
-                    todayDeliveries: firebase.firestore.FieldValue.increment(1)
+                    totalEarnings: window.firebaseIncrement(amount),
+                    todayEarnings: window.firebaseIncrement(amount),
+                    weeklyEarnings: window.firebaseIncrement(amount),
+                    totalDeliveries: window.firebaseIncrement(1),
+                    todayDeliveries: window.firebaseIncrement(1)
                 };
 
-                await db.collection('drivers').doc(currentDriver.uid).update(updateData);
+                await window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDb, 'drivers', currentDriver.uid), updateData);
                 
                 // Update local driver info
                 driverInfo.totalEarnings = (driverInfo.totalEarnings || 0) + amount;
@@ -2232,11 +2144,11 @@
         }
 
         function showEarnings() {
-            const weeklyEarnings = driverStats.weeklyEarnings || driverInfo?.weeklyEarnings || 0;
+            const weeklyEarnings = driverInfo?.weeklyEarnings || 0;
             showGlobalMessage('Weekly earnings: $' + weeklyEarnings.toFixed(2), 'info');
         }
 
-        // ===== 9. UI MANAGEMENT =====
+        // ===== 8. UI MANAGEMENT =====
         function showDashboard() {
             console.log("Showing dashboard");
             document.getElementById('login-section').classList.add('hidden');
@@ -2260,26 +2172,7 @@
             }
         }
 
-        // ===== 10. REAL-TIME LISTENERS =====
-        function setupRealTimeListeners() {
-            if (!currentDriver) return;
-
-            console.log("Setting up real-time listeners for driver:", currentDriver.uid);
-            
-            // Listen for driver info updates
-            db.collection('drivers').doc(currentDriver.uid)
-                .onSnapshot((doc) => {
-                    if (doc.exists) {
-                        driverInfo = doc.data();
-                        updateDriverUI();
-                        console.log("Driver info updated:", driverInfo);
-                    }
-                }, (error) => {
-                    console.error("Error in driver listener:", error);
-                });
-        }
-
-        // ===== 11. UTILITY FUNCTIONS =====
+        // ===== 9. UTILITY FUNCTIONS =====
         function showMessage(elementId, message, type) {
             const element = typeof elementId === 'string' ? document.getElementById(elementId) : elementId;
             if (!element) {
@@ -2319,47 +2212,16 @@
             }, 5000);
         }
 
-        // Add fadeIn animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(-10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // ===== 12. INITIALIZE APP =====
-        window.onload = initDriverApp;
-
-        // ===== PWA SERVICE WORKER =====
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('sw.js')
-                    .then(function(registration) {
-                        console.log('MealMoment Driver app installed successfully!');
-                    })
-                    .catch(function(err) {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
-            });
-        }
-
-        // Show install prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            setTimeout(() => {
-                showGlobalMessage('📱 Install MealMoment Driver app for quick access!', 'info');
-            }, 10000);
+        // ===== 10. INITIALIZE APP =====
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            initDriverApp();
         });
 
-        // Add logout button functionality (you can add a logout button in the header)
-        function addLogoutButton() {
-            const headerContent = document.querySelector('.header-content');
-            if (headerContent && !document.getElementById('logout-btn')) {
+        // Add logout button
+        setTimeout(() => {
+            const driverStatus = document.getElementById('driver-status');
+            if (driverStatus && !document.getElementById('logout-btn')) {
                 const logoutBtn = document.createElement('button');
                 logoutBtn.id = 'logout-btn';
                 logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
@@ -2371,15 +2233,9 @@
                 logoutBtn.style.marginLeft = '10px';
                 logoutBtn.onclick = logoutDriver;
                 
-                const statusDiv = document.getElementById('driver-status');
-                if (statusDiv) {
-                    statusDiv.appendChild(logoutBtn);
-                }
+                driverStatus.appendChild(logoutBtn);
             }
-        }
-
-        // Call this after showing dashboard
-        setTimeout(addLogoutButton, 1000);
+        }, 2000);
     </script>
 </body>
 </html>
