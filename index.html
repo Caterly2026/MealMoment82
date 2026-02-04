@@ -1475,7 +1475,8 @@
         <div class="container">
             <div class="navbar-content">
                 <a href="#home" class="logo-container">
-                    <img src="MealMomentoLogo.jpeg" alt="MealMoment Logo" class="logo-image">
+                    <!-- FIXED: Corrected image filename -->
+                    <img src="mealmomentoLogo.jpeg" alt="MealMoment Logo" class="logo-image">
                     <div>
                         <div class="logo-text">MealMoment</div>
                         <div class="logo-tagline">Fresh • Timely • Delicious</div>
@@ -1746,9 +1747,9 @@
                 <div style="margin-top: var(--space-lg); padding: var(--space-md); background: rgba(255,255,255,0.1); border-radius: var(--radius-md);">
                     <h3 style="color: white; margin-bottom: var(--space-md); text-align: center;">Join the MealMoment Family</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md);">
-                        <!-- Become a Driver Card - UPDATED: Added image above heading -->
+                        <!-- Become a Driver Card - FIXED: Corrected image filename -->
                         <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
-                            <img src="MealMomentoDriverLogo.jpeg" alt="Driver Logo" class="card-image">
+                            <img src="mealmomentoDriverLogo.jpeg" alt="Driver Logo" class="card-image">
                             <h4 style="color: white; margin-bottom: var(--space-xs);">Become a Driver</h4>
                             <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
                                 As a delivery driver, make money and work on your schedule. Sign up in minutes.
@@ -1758,9 +1759,9 @@
                             </a>
                         </div>
                         
-                        <!-- Become a Merchant Card - UPDATED: Replaced icon with image -->
+                        <!-- Become a Merchant Card - FIXED: Corrected image filename -->
                         <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
-                            <img src="MealMomentoRest.jpeg" alt="Restaurant Logo" class="card-image">
+                            <img src="mealmomentoRest.jpeg" alt="Restaurant Logo" class="card-image">
                             <h4 style="color: white; margin-bottom: var(--space-xs);">Become a Merchant</h4>
                             <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
                                 Attract new customers and grow sales, starting with 0% commissions for up to 30 days.
@@ -1770,7 +1771,7 @@
                             </a>
                         </div>
                         
-                        <!-- Get the App Card - UNCHANGED -->
+                        <!-- Get the App Card -->
                         <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
                             <i class="fas fa-mobile-alt" style="font-size: 2rem; color: var(--mm-orange-2); margin-bottom: var(--space-sm);"></i>
                             <h4 style="color: white; margin-bottom: var(--space-xs);">Get the App</h4>
@@ -1795,10 +1796,9 @@
 
     <script>
         // ===== FIREBASE CONFIGURATION =====
-        // UPDATED: Changed to your new Firebase project configuration with custom domain
         const firebaseConfig = {
             apiKey: "AIzaSyDT9tVci1qav_5edsFXEjEC7xPXXwTFg2g",
-            authDomain: "mealmoment.app", // CHANGED TO YOUR CUSTOM DOMAIN
+            authDomain: "mealmoment.app",
             projectId: "mealmoment82",
             storageBucket: "mealmoment82.appspot.com",
             messagingSenderId: "40590092728",
@@ -1850,7 +1850,7 @@
             console.log('Current hour:', currentHour);
             
             if (currentHour >= 5 && currentHour < 11) return 'breakfast';
-            if (currentHour >= 11 && currentHour < 16) return 'lunch'; // FIXED: Changed from 'dinner' to 'lunch'
+            if (currentHour >= 11 && currentHour < 16) return 'lunch';
             return 'dinner';
         }
 
@@ -1887,7 +1887,7 @@
         }
 
         function isRestaurantOpenNow(businessHoursData) {
-            if (!businessHoursData) return true; // Default to open if no hours set
+            if (!businessHoursData) return true;
             
             if (businessHoursData.is24Hours) return true;
             
@@ -1905,7 +1905,6 @@
         // ===== 6. DUPLICATE DISH DISPLAY BUG FIX =====
         async function loadDishesWithoutDuplicates(zipCode, mealType) {
             try {
-                // Get all approved and active dishes
                 const dishesSnapshot = await db.collection('dishes')
                     .where('status', '==', 'approved')
                     .where('isActive', '==', true)
@@ -1921,11 +1920,9 @@
                 dishesSnapshot.forEach(doc => {
                     const dish = { id: doc.id, ...doc.data() };
                     
-                    // Check if dish matches ZIP code
                     const matchesZip = checkDishMatchesZip(dish, zipCode);
                     
                     if (matchesZip) {
-                        // Log dish info for debugging
                         console.log('Dish loaded:', {
                             name: dish.name,
                             category: dish.category,
@@ -1934,10 +1931,8 @@
                             restaurantName: dish.restaurantName
                         });
                         
-                        // Use dish ID as key to prevent duplicates
                         dishesMap.set(doc.id, dish);
                         
-                        // Group by restaurant for restaurant cards
                         const restaurantId = dish.restaurantId;
                         if (!restaurantMap.has(restaurantId)) {
                             restaurantMap.set(restaurantId, {
@@ -1973,14 +1968,9 @@
 
         // ===== 7. CART PRE-SELECTED ITEM BUG FIX =====
         function clearPreSelectedCartItems() {
-            // Clear cart from localStorage
             localStorage.removeItem('mealMomentCart');
             currentCart = [];
-            
-            // Update cart display
             updateCartDisplay();
-            
-            // Show notification
             showNotification('Cart cleared successfully', 'success');
         }
 
@@ -1990,13 +1980,9 @@
             setInterval(updateTime, 60000);
             updateCartDisplay();
             
-            // Clear any pre-selected items on init
             clearPreSelectedCartItems();
-            
-            // Setup ZIP code input event listeners
             setupZipCodeInput();
             
-            // Check URL for zip parameter
             const urlParams = new URLSearchParams(window.location.search);
             const zipParam = urlParams.get('zip');
             if (zipParam) {
@@ -2004,7 +1990,6 @@
                 setTimeout(() => findLocation(), 500);
             }
             
-            // Show mobile ZIP options on mobile
             if (window.innerWidth <= 768) {
                 const mobileOptions = document.getElementById('mobile-zip-options');
                 if (mobileOptions) {
@@ -2012,18 +1997,15 @@
                 }
             }
             
-            // Prevent auto-focus on page load
             preventAutoFocus();
         }
 
         // Prevent auto-focus on page load
         function preventAutoFocus() {
-            // Remove any existing focus
             if (document.activeElement) {
                 document.activeElement.blur();
             }
             
-            // Add a small delay and ensure no focus
             setTimeout(() => {
                 const zipInput = document.getElementById('zip-code');
                 if (zipInput && document.activeElement === zipInput) {
@@ -2037,32 +2019,24 @@
             const zipInput = document.getElementById('zip-code');
             if (!zipInput) return;
             
-            // Add input event listener
             zipInput.addEventListener('input', function(e) {
-                // Only allow numbers
                 this.value = this.value.replace(/[^0-9]/g, '');
                 
-                // Limit to 5 characters
                 if (this.value.length > 5) {
                     this.value = this.value.slice(0, 5);
                 }
                 
-                // Validate as user types
                 validateZipCodeInput();
             });
             
-            // Add enter key support
             zipInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     findLocation();
                 }
             });
             
-            // Make sure input is visible and clickable but not auto-focused
             zipInput.style.opacity = '1';
             zipInput.style.pointerEvents = 'auto';
-            
-            // Remove any autofocus attribute
             zipInput.removeAttribute('autofocus');
         }
 
@@ -2084,21 +2058,17 @@
             
             const value = zipInput.value.trim();
             
-            // Validate as user types
             if (value.length === 5 && /^\d{5}$/.test(value)) {
-                // Valid 5-digit ZIP
                 errorElement.classList.add('hidden');
                 findButton.disabled = false;
                 findButton.style.opacity = '1';
                 findButton.style.cursor = 'pointer';
             } else if (value.length > 0) {
-                // Invalid input
                 errorElement.classList.remove('hidden');
                 findButton.disabled = true;
                 findButton.style.opacity = '0.5';
                 findButton.style.cursor = 'not-allowed';
             } else {
-                // Empty field
                 errorElement.classList.add('hidden');
                 findButton.disabled = false;
                 findButton.style.opacity = '1';
@@ -2124,23 +2094,20 @@
         // GET SALES TAX RATE FOR STATE
         async function getSalesTaxRate(stateCode) {
             try {
-                // Check if we have the state in our fallback
                 const stateUpper = stateCode.toUpperCase();
                 if (stateTaxRates[stateUpper]) {
                     return stateTaxRates[stateUpper];
                 }
                 
-                return 0.0825; // Default 8.25% if state not found
-                
+                return 0.0825;
             } catch (error) {
                 console.error('Error fetching tax rate:', error);
-                // Use fallback
                 const stateUpper = stateCode.toUpperCase();
                 return stateTaxRates[stateUpper] || 0.0825;
             }
         }
 
-        // FIND LOCATION USING ZIP CODE API (Works for all USA)
+        // FIND LOCATION USING ZIP CODE API
         async function findLocation() {
             const zipInput = document.getElementById('zip-code');
             const errorElement = document.getElementById('zip-error');
@@ -2153,14 +2120,12 @@
             const zipValue = zipInput.value.trim();
             const zipCodePattern = /^\d{5}$/;
 
-            // Basic validation
             if (!zipCodePattern.test(zipValue)) {
                 errorElement.classList.remove('hidden');
                 showNotification('Please enter a valid 5-digit US ZIP code.', 'error');
                 return;
             }
 
-            // Get DOM elements with null checks
             const mealTypeBadge = document.getElementById('meal-type');
             const cityNameElement = document.getElementById('city-name');
             const mealTextElement = document.getElementById('meal-text');
@@ -2170,18 +2135,15 @@
                 return;
             }
 
-            // Show loading state
             mealTypeBadge.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Looking up...`;
             cityNameElement.textContent = `Checking ZIP ${zipValue}...`;
 
             try {
-                // Use Zippopotam.us API for real ZIP code data
                 const apiUrl = `https://api.zippopotam.us/us/${zipValue}`;
                 const response = await fetch(apiUrl, {
-                    timeout: 10000 // 10 second timeout
+                    timeout: 10000
                 });
 
-                // Handle HTTP errors
                 if (!response.ok) {
                     if (response.status === 404) {
                         throw new Error('ZIP code not found. Please enter a valid US ZIP code.');
@@ -2192,19 +2154,15 @@
 
                 const data = await response.json();
 
-                // Process API response
                 if (!data.places || data.places.length === 0) {
                     throw new Error('No city data found for this ZIP code.');
                 }
 
-                // Get the primary place (first one in array)
                 const primaryPlace = data.places[0];
                 const stateCode = primaryPlace['state abbreviation'];
                 
-                // Get sales tax rate for the state
                 currentStateTaxRate = await getSalesTaxRate(stateCode);
                 
-                // Update tax rate display
                 const taxRateElement = document.getElementById('tax-rate');
                 if (taxRateElement) {
                     taxRateElement.textContent = `${(currentStateTaxRate * 100).toFixed(2)}%`;
@@ -2219,10 +2177,8 @@
                     taxRate: currentStateTaxRate
                 };
 
-                // Update UI with real data
                 cityNameElement.textContent = `${currentCity.city}, ${currentCity.state}`;
 
-                // Determine meal type based on time - FIXED: Correct meal times
                 const currentHour = updateTime();
                 let mealText, mealIcon;
                 
@@ -2230,7 +2186,7 @@
                     mealText = 'BREAKFAST MENU';
                     mealIcon = '☕';
                 } else if (currentHour >= 11 && currentHour < 16) {
-                    mealText = 'LUNCH MENU'; // FIXED: This should be lunch, not dinner
+                    mealText = 'LUNCH MENU';
                     mealIcon = '🥪';
                 } else {
                     mealText = 'DINNER MENU';
@@ -2240,10 +2196,8 @@
                 mealTextElement.textContent = mealText;
                 mealTypeBadge.innerHTML = `<i class="fas fa-utensils"></i> ${mealText} ${mealIcon}`;
 
-                // Load the menu for this ZIP code FROM FIREBASE
                 loadMenu(zipValue, mealText.toLowerCase());
 
-                // Update checkout form with city/state info
                 const cityInput = document.getElementById('city');
                 const stateInput = document.getElementById('state');
                 const zipFormInput = document.getElementById('zip');
@@ -2255,7 +2209,6 @@
                 errorElement.classList.add('hidden');
                 showNotification(`Restaurant specials loaded for ${currentCity.city}, ${currentCity.state}!`, 'success');
 
-                // FIXED: Scroll to menu section when ZIP code is entered
                 const menuSection = document.getElementById('menu');
                 if (menuSection) {
                     setTimeout(() => {
@@ -2264,18 +2217,15 @@
                 }
 
             } catch (error) {
-                // Handle errors
                 console.error('Location fetch error:', error);
                 errorElement.classList.remove('hidden');
                 errorElement.textContent = error.message;
                 showNotification(error.message, 'error');
                 
-                // Reset UI to prompt state with null checks
                 if (cityNameElement) cityNameElement.textContent = 'Select Your City';
                 if (mealTextElement) mealTextElement.textContent = 'Enter ZIP Code First';
                 if (mealTypeBadge) mealTypeBadge.innerHTML = `<i class="fas fa-utensils"></i> Enter ZIP Code First`;
                 
-                // For demo purposes, load a default city if API fails
                 if (zipValue === '06320' || zipValue === '90001' || zipValue === '10001') {
                     setTimeout(() => {
                         loadDemoCity(zipValue);
@@ -2302,7 +2252,6 @@
                     taxRate: stateTaxRates[demo.state] || 0.0825
                 };
                 
-                // Update UI
                 const cityNameElement = document.getElementById('city-name');
                 const mealTextElement = document.getElementById('meal-text');
                 const mealTypeBadge = document.getElementById('meal-type');
@@ -2311,7 +2260,6 @@
                 if (cityNameElement) cityNameElement.textContent = `${demo.city}, ${demo.state}`;
                 if (taxRateElement) taxRateElement.textContent = `${(currentCity.taxRate * 100).toFixed(2)}%`;
                 
-                // Determine meal type
                 const currentHour = updateTime();
                 let mealText, mealIcon;
                 
@@ -2319,7 +2267,7 @@
                     mealText = 'BREAKFAST MENU';
                     mealIcon = '☕';
                 } else if (currentHour >= 11 && currentHour < 16) {
-                    mealText = 'LUNCH MENU'; // FIXED: This should be lunch, not dinner
+                    mealText = 'LUNCH MENU';
                     mealIcon = '🥪';
                 } else {
                     mealText = 'DINNER MENU';
@@ -2329,12 +2277,10 @@
                 if (mealTextElement) mealTextElement.textContent = mealText;
                 if (mealTypeBadge) mealTypeBadge.innerHTML = `<i class="fas fa-utensils"></i> ${mealText} ${mealIcon}`;
 
-                // Load menu
                 loadMenu(zipCode, mealText.toLowerCase());
                 
                 showNotification(`Demo mode: Restaurant specials loaded for ${demo.city}, ${demo.state}`, 'info');
                 
-                // FIXED: Scroll to menu section for demo cities too
                 const menuSection = document.getElementById('menu');
                 if (menuSection) {
                     setTimeout(() => {
@@ -2347,7 +2293,6 @@
         // Helper function to estimate timezone from state
         function getTimezoneFromState(stateAbbr) {
             const stateTimezones = {
-                // Eastern Time
                 'CT': 'America/New_York', 'DC': 'America/New_York', 'DE': 'America/New_York',
                 'FL': 'America/New_York', 'GA': 'America/New_York', 'IN': 'America/New_York',
                 'KY': 'America/New_York', 'MA': 'America/New_York', 'MD': 'America/New_York',
@@ -2356,29 +2301,24 @@
                 'OH': 'America/New_York', 'PA': 'America/New_York', 'RI': 'America/New_York',
                 'SC': 'America/New_York', 'TN': 'America/New_York', 'VT': 'America/New_York',
                 'VA': 'America/New_York', 'WV': 'America/New_York',
-                // Central Time
                 'AL': 'America/Chicago', 'AR': 'America/Chicago', 'IL': 'America/Chicago',
                 'IA': 'America/Chicago', 'KS': 'America/Chicago', 'LA': 'America/Chicago',
                 'MN': 'America/Chicago', 'MS': 'America/Chicago', 'MO': 'America/Chicago',
                 'NE': 'America/Chicago', 'ND': 'America/Chicago', 'OK': 'America/Chicago',
                 'SD': 'America/Chicago', 'TX': 'America/Chicago', 'WI': 'America/Chicago',
-                // Mountain Time
                 'AZ': 'America/Phoenix', 'CO': 'America/Denver', 'ID': 'America/Denver',
                 'MT': 'America/Denver', 'NM': 'America/Denver', 'UT': 'America/Denver',
                 'WY': 'America/Denver',
-                // Pacific Time
                 'CA': 'America/Los_Angeles', 'NV': 'America/Los_Angeles', 'OR': 'America/Los_Angeles',
                 'WA': 'America/Los_Angeles',
-                // Others
                 'AK': 'America/Anchorage', 'HI': 'Pacific/Honolulu',
-                // US Territories
                 'PR': 'America/Puerto_Rico', 'GU': 'Pacific/Guam', 'VI': 'America/St_Thomas',
                 'MP': 'Pacific/Saipan', 'AS': 'Pacific/Pago_Pago'
             };
             return stateTimezones[stateAbbr.toUpperCase()] || 'America/New_York';
         }
 
-        // Load menu from Firebase based on ZIP code - FIXED ERROR HANDLING
+        // Load menu from Firebase based on ZIP code
         async function loadMenu(zipCode, mealType) {
             const menuContainer = document.getElementById('menu-container');
             if (!menuContainer) {
@@ -2386,7 +2326,6 @@
                 return;
             }
             
-            // Show loading state
             menuContainer.innerHTML = `
                 <div class="loading">
                     <i class="fas fa-utensils fa-spin"></i>
@@ -2395,10 +2334,8 @@
             `;
             
             try {
-                // Load dishes without duplicates and grouped by restaurant
                 const result = await loadDishesWithoutDuplicates(zipCode, mealType);
                 
-                // Check if result is valid
                 if (!result || !result.allDishes || !Array.isArray(result.allDishes)) {
                     throw new Error('Invalid data received from server');
                 }
@@ -2406,7 +2343,6 @@
                 const { allDishes, restaurants } = result;
                 
                 if (!allDishes || allDishes.length === 0) {
-                    // No dishes for this ZIP code - show friendly message
                     menuContainer.innerHTML = `
                         <div class="message success-message" style="text-align: center;">
                             <i class="fas fa-map-marker-alt" style="font-size: 3rem; margin-bottom: var(--space-md); color: var(--mm-green);"></i>
@@ -2429,7 +2365,6 @@
                     return;
                 }
                 
-                // Filter dishes by current meal time
                 const currentMealCategory = getCurrentMealCategory();
                 const filteredDishes = filterDishesByMealTime(allDishes);
                 
@@ -2449,13 +2384,10 @@
                     return;
                 }
                 
-                // Build menu HTML with restaurant cards
                 let html = '';
                 
-                // Display time-based menu header with correct count
                 html += `<h3><i class="fas fa-clock" style="color: var(--mm-orange);"></i> ${currentMealCategory.toUpperCase()} Menu (${filteredDishes.length} items)</h3>`;
                 
-                // Group filtered dishes by restaurant
                 const filteredRestaurants = [];
                 if (restaurants && Array.isArray(restaurants)) {
                     restaurants.forEach(restaurant => {
@@ -2474,7 +2406,6 @@
                     });
                 }
                 
-                // If no restaurants have dishes, show message
                 if (filteredRestaurants.length === 0) {
                     menuContainer.innerHTML = `
                         <div class="message info-message">
@@ -2492,13 +2423,10 @@
                     return;
                 }
                 
-                // Display restaurant cards
                 for (const restaurant of filteredRestaurants) {
-                    // Load business hours for this restaurant
                     const businessHours = await loadRestaurantBusinessHours(restaurant.id);
                     const isOpen = isRestaurantOpenNow(businessHours);
                     
-                    // Skip restaurant if it's closed
                     if (!isOpen && businessHours) continue;
                     
                     html += `
@@ -2523,18 +2451,15 @@
                             <div class="restaurant-dishes-grid">
                     `;
                     
-                    // Display restaurant's dishes - UPDATED FOR MOBILE LAYOUT
                     restaurant.dishes.forEach(item => {
                         if (!item) return;
                         
                         const isInCart = currentCart.some(cartItem => cartItem.id === item.id);
                         const cartQuantity = isInCart ? currentCart.find(cartItem => cartItem.id === item.id).quantity : 0;
                         
-                        // Check if we're on mobile
                         const isMobile = window.innerWidth <= 768;
                         
                         if (isMobile) {
-                            // Mobile layout - horizontal like mv.jpeg and mv1.jpeg
                             html += `
                                 <div class="menu-item">
                                     <div class="item-image">
@@ -2565,7 +2490,6 @@
                                 </div>
                             `;
                         } else {
-                            // Desktop layout - vertical card
                             html += `
                                 <div class="menu-item">
                                     <div class="item-image">
@@ -2602,7 +2526,6 @@
                     `;
                 }
                 
-                // If no restaurants are open, show message
                 if (!html.includes('menu-item')) {
                     menuContainer.innerHTML = `
                         <div class="message info-message">
@@ -2618,12 +2541,10 @@
                 menuContainer.innerHTML = html;
                 updateCheckoutButton();
                 
-                // Show success message with correct count
                 showNotification(`Found ${filteredDishes.length} ${currentMealCategory} items from ${filteredRestaurants.length} restaurants!`, 'success');
                 
             } catch (error) {
                 console.error('Error loading menu from Firebase:', error);
-                // Show friendly error message
                 menuContainer.innerHTML = `
                     <div class="message success-message" style="text-align: center;">
                         <i class="fas fa-utensils" style="font-size: 3rem; margin-bottom: var(--space-md); color: var(--mm-green);"></i>
@@ -2651,7 +2572,6 @@
         // Add item to cart from Firebase
         async function addToCart(itemId) {
             try {
-                // Get dish from Firebase
                 const dishDoc = await db.collection('dishes').doc(itemId).get();
                 if (!dishDoc.exists) {
                     showNotification('Dish not found', 'error');
@@ -2679,13 +2599,12 @@
                 localStorage.setItem('mealMomentCart', JSON.stringify(currentCart));
                 updateCartDisplay();
                 
-                // Reload menu to update cart counts
                 const zipCode = document.getElementById('zip-code').value;
                 if (zipCode) {
                     const currentHour = updateTime();
                     let mealType = 'dinner';
                     if (currentHour >= 5 && currentHour < 11) mealType = 'breakfast';
-                    else if (currentHour >= 11 && currentHour < 16) mealType = 'lunch'; // FIXED: Correct meal type
+                    else if (currentHour >= 11 && currentHour < 16) mealType = 'lunch';
                     else mealType = 'dinner';
                     loadMenu(zipCode, mealType);
                 }
@@ -2711,13 +2630,12 @@
             localStorage.setItem('mealMomentCart', JSON.stringify(currentCart));
             updateCartDisplay();
             
-            // Reload menu to update cart counts
             const zipCode = document.getElementById('zip-code').value;
             if (zipCode) {
                 const currentHour = updateTime();
                 let mealType = 'dinner';
                 if (currentHour >= 5 && currentHour < 11) mealType = 'breakfast';
-                else if (currentHour >= 11 && currentHour < 16) mealType = 'lunch'; // FIXED: Correct meal type
+                else if (currentHour >= 11 && currentHour < 16) mealType = 'lunch';
                 else mealType = 'dinner';
                 loadMenu(zipCode, mealType);
             }
@@ -2751,7 +2669,6 @@
                 return;
             }
             
-            // Calculate totals
             let subtotal = 0;
             currentCart.forEach(item => {
                 subtotal += item.price * item.quantity;
@@ -2761,12 +2678,10 @@
             const deliveryFee = 2.99;
             const total = subtotal + tax + deliveryFee;
             
-            // Update totals display
             subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
             taxEl.textContent = `$${tax.toFixed(2)}`;
             totalEl.textContent = `$${total.toFixed(2)}`;
             
-            // Build cart items HTML
             let cartHTML = '';
             currentCart.forEach(item => {
                 cartHTML += `
@@ -2860,11 +2775,9 @@
             showCheckoutMessage('Processing payment...', 'info');
             
             try {
-                // Create order data
                 const orderNumber = 'MM-' + Date.now().toString().slice(-8);
                 const deliveryTime = new Date(Date.now() + 45 * 60000);
                 
-                // Get unique restaurant IDs from cart
                 const restaurantIds = [...new Set(currentCart.map(item => item.restaurantId).filter(id => id))];
                 
                 const orderData = {
@@ -2890,10 +2803,8 @@
                     restaurantIds: restaurantIds
                 };
                 
-                // Save order to Firebase
                 await db.collection('orders').add(orderData);
                 
-                // Clear cart and show confirmation
                 currentCart = [];
                 localStorage.setItem('mealMomentCart', JSON.stringify([]));
                 
@@ -3003,7 +2914,6 @@
         window.onload = init;
 
         // ===== PWA SERVICE WORKER REGISTRATION =====
-        // Service Worker Registration
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', function() {
             navigator.serviceWorker.register('sw.js')
@@ -3019,12 +2929,9 @@
         // Show install prompt
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
-          // Prevent Chrome 67 and earlier from automatically showing the prompt
           e.preventDefault();
-          // Stash the event so it can be triggered later
           deferredPrompt = e;
           
-          // Show install button (optional)
           setTimeout(() => {
             showNotification('📱 Add MealMoment to your home screen for quick access!', 'info');
           }, 5000);
