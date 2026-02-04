@@ -1,0 +1,3000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- PWA Manifest and Meta Tags -->
+    <link rel="manifest" href="manifest-customer.json">
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍽️ MealMoment - Fresh Meals Based on Local Time</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            /* Brand Colors */
+            --mm-orange: #FF6A00;
+            --mm-orange-2: #FF8A2A;
+            --mm-green: #2E7D32;
+            --mm-green-2: #4CAF50;
+            --mm-charcoal: #1F1F1F;
+            --mm-gray-900: #2B2B2B;
+            --mm-gray-700: #5B5B5B;
+            --mm-gray-200: #EAEAEA;
+            --mm-bg: #FFFFFF;
+            --mm-bg-soft: #F8FAFC;
+            --mm-gradient: linear-gradient(90deg, #FF6A00 0%, #2E7D32 100%);
+            
+            /* Typography */
+            --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;
+            --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+            
+            /* Spacing */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+            --space-2xl: 4rem;
+            
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+        }
+
+        /* ===== RESET & BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--mm-bg);
+            color: var(--mm-charcoal);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--space-md);
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+        }
+
+        h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+
+        h3 {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: var(--space-md);
+            color: var(--mm-gray-700);
+        }
+
+        a {
+            color: var(--mm-green);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--mm-orange);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Focus States for Accessibility */
+        *:focus {
+            outline: 3px solid var(--mm-green-2);
+            outline-offset: 2px;
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        /* ===== HEADER / NAVBAR ===== */
+        .navbar {
+            background-color: var(--mm-bg);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 25px 0; /* Increased padding for larger logo */
+        }
+
+        .navbar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--mm-gradient);
+        }
+
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Reduced from var(--space-md) to 12px */
+            text-decoration: none;
+        }
+
+        /* LARGER LOGO - Updated from 90px to 115px (25px increase) */
+        .logo-image {
+            height: 115px; /* Increased from 90px to 115px */
+            width: auto;
+            border-radius: var(--radius-md);
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-text {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 2.5rem; /* Increased from 2.25rem */
+            background: var(--mm-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            line-height: 1; /* Reduced line height */
+        }
+
+        .logo-tagline {
+            font-size: 0.875rem;
+            color: var(--mm-gray-700);
+            font-weight: 500;
+            margin-top: 4px; /* Reduced margin */
+            line-height: 1.2;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--mm-charcoal);
+            position: relative;
+            padding: var(--space-xs) 0;
+            white-space: nowrap;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            color: var(--mm-orange);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: var(--mm-gradient);
+            transition: width 0.3s ease;
+        }
+   
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            padding: var(--space-2xl) 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 60%;
+            height: 200%;
+            background: linear-gradient(135deg, 
+                rgba(255, 106, 0, 0.08) 0%, 
+                rgba(46, 125, 50, 0.08) 100%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--mm-gray-700);
+            margin-bottom: var(--space-xl);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+            padding: 1rem 2rem;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-primary {
+            background: var(--mm-gradient);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background: var(--mm-bg);
+            color: var(--mm-charcoal);
+            border: 2px solid var(--mm-gray-200);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--mm-green);
+            color: var(--mm-green);
+            transform: translateY(-1px);
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--mm-bg);
+            border: 1px solid var(--mm-gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--mm-green-2);
+        }
+
+        /* ===== MAIN CONTENT LAYOUT ===== */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: var(--space-xl);
+            margin-bottom: var(--space-xl);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: calc(130px + var(--space-md)); /* Adjusted for larger logo */
+            height: fit-content;
+        }
+
+        /* Steps */
+        .step {
+            margin-bottom: var(--space-lg);
+            padding: var(--space-lg);
+            background: var(--mm-bg-soft);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--mm-orange);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--mm-gradient);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            margin-right: var(--space-sm);
+            margin-bottom: var(--space-sm);
+        }
+
+        .step h3 {
+            display: inline-block;
+            color: var(--mm-charcoal);
+        }
+
+        /* Location Selector */
+        .location-selector {
+            margin-top: var(--space-xl);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-md);
+        }
+
+        label {
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--mm-gray-900);
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--mm-gray-200);
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--mm-charcoal);
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--mm-green);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        /* Mobile-specific input fixes */
+        input[type="text"], input[type="number"], input[type="tel"] {
+            font-size: 16px; /* Prevents iOS zoom on focus */
+        }
+
+        /* ===== MENU SECTION ===== */
+        .menu-section {
+            background: var(--mm-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            position: relative; /* Added for z-index control */
+            z-index: 2; /* Ensures menu is above other elements */
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-md);
+            border-bottom: 2px solid var(--mm-gray-200);
+        }
+
+        .time-badge {
+            background: var(--mm-bg-soft);
+            color: var(--mm-charcoal);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            border: 2px solid var(--mm-gray-200);
+        }
+
+        .time-badge i {
+            color: var(--mm-orange);
+        }
+
+        /* Menu Grid - UPDATED: Smaller item size like in image */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .menu-item {
+            position: relative;
+            border: 2px solid var(--mm-gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            background: var(--mm-bg);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-4px);
+            border-color: var(--mm-green);
+            box-shadow: var(--shadow-md);
+        }
+
+        .menu-item.special {
+            border-color: var(--mm-orange);
+            background: linear-gradient(135deg, rgba(255, 106, 0, 0.03) 0%, rgba(255, 106, 0, 0.08) 100%);
+        }
+
+        .special-badge {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: var(--mm-orange);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* UPDATED: Smaller image container for desktop */
+        .item-image {
+            width: 100%;
+            height: 160px; /* Reduced from 200px for desktop */
+            background: var(--mm-bg-soft);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--mm-gray-700);
+            overflow: hidden;
+        }
+
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-name {
+            font-size: 1.1rem; /* Reduced from 1.25rem */
+            font-weight: 600;
+            color: var(--mm-charcoal);
+            margin-bottom: var(--space-xs);
+            line-height: 1.3;
+        }
+
+        .item-description {
+            color: var(--mm-gray-700);
+            font-size: 0.875rem; /* Reduced from 0.95rem */
+            margin-bottom: var(--space-sm);
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+
+        .item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .item-price {
+            font-size: 1.25rem; /* Reduced from 1.5rem */
+            font-weight: 700;
+            color: var(--mm-green);
+        }
+
+        .item-meta {
+            color: var(--mm-gray-700);
+            font-size: 0.75rem; /* Reduced from 0.875rem */
+            background: var(--mm-bg-soft);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .add-to-cart-btn {
+            background: var(--mm-gradient);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem; /* Reduced padding */
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.875rem; /* Reduced font size */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            transition: all 0.2s ease;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Restaurant Info on Menu Items */
+        .restaurant-info {
+            font-size: 0.75rem; /* Reduced from 0.8rem */
+            color: var(--mm-gray-700);
+            margin-top: var(--space-xs);
+            font-style: italic;
+        }
+
+        /* Restaurant Card */
+        .restaurant-card {
+            border: 2px solid var(--mm-gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-xl);
+            background: var(--mm-bg-soft);
+        }
+
+        .restaurant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md); /* Reduced from var(--space-lg) */
+            padding-bottom: var(--space-sm);
+            border-bottom: 2px solid var(--mm-gray-200);
+        }
+
+        .restaurant-status {
+            padding: 0.4rem 0.8rem; /* Reduced padding */
+            border-radius: var(--radius-md);
+            font-size: 0.75rem; /* Reduced from 0.875rem */
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: var(--mm-green);
+            color: white;
+        }
+
+        .status-closed {
+            background: #dc3545;
+            color: white;
+        }
+
+        .restaurant-dishes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Reduced minmax */
+            gap: var(--space-sm); /* Reduced gap */
+        }
+
+        /* ===== CART SECTION ===== */
+        .cart-section {
+            background: var(--mm-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            position: relative; /* Added for z-index control */
+            z-index: 2; /* Ensures cart is above other elements */
+        }
+
+        .cart-items {
+            margin: var(--space-lg) 0;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid var(--mm-gray-200);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .quantity-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--mm-gray-200);
+            background: var(--mm-bg);
+            color: var(--mm-charcoal);
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .quantity-btn:hover {
+            border-color: var(--mm-green);
+            color: var(--mm-green);
+        }
+
+        .cart-total {
+            background: var(--mm-bg-soft);
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: var(--space-sm) 0;
+            font-size: 1.1rem;
+        }
+
+        .final-total {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--mm-green);
+            border-top: 2px solid var(--mm-gray-200);
+            padding-top: var(--space-md);
+            margin-top: var(--space-md);
+        }
+
+        /* ===== CHECKOUT FORM ===== */
+        .checkout-form {
+            background: var(--mm-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            position: relative; /* Added for z-index control */
+            z-index: 10; /* Higher z-index for checkout overlay */
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Payment Section */
+        .payment-section {
+            margin-top: var(--space-xl);
+            padding-top: var(--space-lg);
+            border-top: 2px solid var(--mm-gray-200);
+        }
+
+        /* Messages */
+        .message {
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            margin: var(--space-md) 0;
+            font-weight: 500;
+        }
+
+        .success-message {
+            background: rgba(46, 125, 50, 0.1);
+            color: var(--mm-green);
+            border: 1px solid rgba(46, 125, 50, 0.2);
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .info-message {
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            border: 1px solid rgba(13, 110, 253, 0.2);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--mm-charcoal);
+            color: white;
+            padding: var(--space-2xl) 0 var(--space-xl);
+            margin-top: var(--space-2xl);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 2rem;
+            background: var(--mm-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .social-links {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.2s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--mm-green-2);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: var(--space-xl);
+            padding-top: var(--space-lg);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: var(--space-2xl);
+            color: var(--mm-gray-700);
+        }
+
+        .loading i {
+            font-size: 3rem;
+            color: var(--mm-orange);
+            margin-bottom: var(--space-md);
+        }
+
+        /* Mobile ZIP Options */
+        .mobile-zip-options {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            background: var(--mm-bg-soft);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--mm-gray-200);
+        }
+
+        .mobile-zip-options p {
+            margin-bottom: var(--space-sm);
+            color: var(--mm-gray-700);
+            font-size: 0.9rem;
+        }
+
+        .zip-buttons {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .zip-button {
+            padding: 0.5rem 1rem;
+            background: var(--mm-bg);
+            border: 1px solid var(--mm-gray-200);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .zip-button:hover {
+            border-color: var(--mm-green);
+            background: var(--mm-bg-soft);
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .menu-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+            
+            /* Fix mobile z-index issue */
+            .menu-section {
+                margin-top: var(--space-lg);
+                position: relative;
+                z-index: 5;
+            }
+            
+            .hero {
+                position: relative;
+                z-index: 1;
+            }
+            
+            /* Ensure sidebar is visible */
+            .sidebar {
+                position: relative;
+                top: 0;
+            }
+            
+            /* Improved navbar for mobile with owner link */
+            .navbar-content {
+                flex-wrap: wrap;
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .nav-links {
+                justify-content: center;
+                margin-top: var(--space-sm);
+                gap: var(--space-sm);
+            }
+            
+            .nav-link {
+                font-size: 0.9rem;
+                padding: 0.25rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-content {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .nav-links {
+                gap: var(--space-sm);
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: var(--space-xl);
+                text-align: center;
+            }
+            
+            .hero::before {
+                width: 80%;
+                height: 150%;
+                right: -40%;
+            }
+            
+            /* Adjust logo size for mobile - Increased by 25px */
+            .logo-image {
+                height: 95px; /* Increased from 70px to 95px (25px increase) */
+            }
+            
+            .logo-text {
+                font-size: 2rem; /* Increased for mobile */
+            }
+            
+            .logo-container {
+                gap: 10px; /* Even smaller gap on mobile */
+            }
+            
+            /* Fix mobile layout z-index */
+            .menu-section {
+                margin-top: var(--space-xl);
+            }
+            
+            .hero {
+                margin-bottom: var(--space-lg);
+            }
+            
+            /* Mobile ZIP input improvements */
+            #zip-code {
+                font-size: 16px; /* Prevent zoom on iOS */
+                height: 50px;
+            }
+            
+            .mobile-zip-options {
+                display: block !important;
+            }
+            
+            /* Compact navbar for mobile */
+            .nav-link {
+                font-size: 0.85rem;
+                padding: 0.25rem;
+            }
+            
+            .btn-secondary {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            /* ===== MOBILE IMAGE FIXES ===== */
+            /* Make dish images much smaller on mobile like mv.jpeg and mv1.jpeg */
+            .item-image {
+                height: 100px !important; /* Much smaller for mobile - like the reference images */
+                margin-bottom: var(--space-xs);
+            }
+            
+            .menu-item {
+                padding: var(--space-sm);
+                margin-bottom: var(--space-sm);
+            }
+            
+            .restaurant-card {
+                padding: var(--space-md);
+            }
+            
+            .restaurant-dishes-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-xs);
+            }
+            
+            .item-name {
+                font-size: 1rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            .item-description {
+                font-size: 0.8rem;
+                margin-bottom: 0.5rem;
+                line-height: 1.3;
+            }
+            
+            .item-footer {
+                flex-wrap: wrap;
+                gap: var(--space-xs);
+            }
+            
+            .add-to-cart-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+                width: 100%;
+                justify-content: center;
+                margin-top: var(--space-xs);
+            }
+            
+            .item-price {
+                font-size: 1.1rem;
+            }
+            
+            .item-meta {
+                font-size: 0.7rem;
+            }
+            
+            /* Make restaurant header more compact */
+            .restaurant-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-xs);
+                margin-bottom: var(--space-sm);
+            }
+            
+            .restaurant-header h4 {
+                font-size: 1.1rem;
+            }
+            
+            .restaurant-status {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 var(--space-sm);
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.75rem;
+            }
+            
+            .btn {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.95rem;
+            }
+            
+            .step {
+                padding: var(--space-md);
+            }
+            
+            .logo-image {
+                height: 85px; /* Slightly smaller for very small screens */
+            }
+            
+            .logo-text {
+                font-size: 1.75rem;
+            }
+            
+            /* Ensure menu is fully visible on small screens */
+            .menu-section {
+                margin-top: var(--space-xl);
+                padding: var(--space-lg);
+            }
+            
+            /* Ultra-compact navbar for small screens */
+            .nav-links {
+                gap: 0.5rem;
+            }
+            
+            .nav-link {
+                font-size: 0.8rem;
+            }
+            
+            .btn-secondary {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.85rem;
+            }
+            
+            .navbar {
+                padding: 15px 0;
+            }
+            
+            /* ===== EXTRA SMALL SCREEN IMAGE FIXES ===== */
+            .item-image {
+                height: 90px !important; /* Even smaller for very small screens */
+            }
+            
+            .menu-item {
+                padding: 0.75rem;
+            }
+            
+            .restaurant-card {
+                padding: var(--space-sm);
+            }
+            
+            .item-name {
+                font-size: 0.95rem;
+            }
+            
+            .item-description {
+                font-size: 0.75rem;
+                -webkit-line-clamp: 2;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            
+            .add-to-cart-btn {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            /* Extra small screens */
+            .nav-links {
+                gap: 0.25rem;
+            }
+            
+            .nav-link {
+                font-size: 0.75rem;
+                padding: 0.125rem;
+            }
+            
+            .logo-image {
+                height: 70px;
+            }
+            
+            .logo-text {
+                font-size: 1.5rem;
+            }
+            
+            .logo-container {
+                gap: 5px;
+            }
+            
+            .btn-secondary {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+            
+            /* ===== ULTRA SMALL SCREEN IMAGE FIXES ===== */
+            .item-image {
+                height: 80px !important; /* Very compact like reference images */
+            }
+            
+            .menu-item {
+                padding: 0.5rem;
+            }
+            
+            .restaurant-card {
+                padding: 0.75rem;
+                margin-bottom: var(--space-md);
+            }
+            
+            .item-name {
+                font-size: 0.9rem;
+                margin-bottom: 0.125rem;
+            }
+            
+            .item-description {
+                font-size: 0.7rem;
+                -webkit-line-clamp: 2;
+                margin-bottom: 0.25rem;
+            }
+            
+            .item-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+            
+            .add-to-cart-btn {
+                width: 100%;
+                justify-content: center;
+                margin-top: 0.25rem;
+            }
+            
+            .item-price {
+                font-size: 1rem;
+            }
+            
+            .item-meta {
+                font-size: 0.65rem;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--mm-green);
+            color: white;
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .notification.success {
+            background: var(--mm-green);
+        }
+
+        /* Scroll to menu section on ZIP code entry */
+        .menu-scroll-target {
+            scroll-margin-top: 100px;
+        }
+        
+        /* Image error fallback */
+        .image-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--mm-bg-soft);
+            border-radius: var(--radius-md);
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .image-fallback i {
+            font-size: 2rem;
+            color: var(--mm-gray-700);
+            margin-bottom: 8px;
+        }
+        
+        .image-fallback span {
+            font-size: 0.8rem;
+            color: var(--mm-gray-700);
+        }
+        
+        /* ===== MOBILE-OPTIMIZED DISH CARD LAYOUT ===== */
+        /* This will make dish cards look more like mv.jpeg and mv1.jpeg on mobile */
+        @media (max-width: 768px) {
+            .menu-item {
+                display: flex;
+                flex-direction: row; /* Horizontal layout like mv.jpeg */
+                align-items: center;
+                gap: var(--space-sm);
+                padding: var(--space-sm);
+            }
+            
+            .item-image {
+                width: 80px !important; /* Fixed width like reference images */
+                height: 80px !important; /* Fixed height */
+                min-width: 80px;
+                min-height: 80px;
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+            
+            .item-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .item-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                min-width: 0; /* Prevents flex overflow */
+            }
+            
+            .item-name {
+                font-size: 0.95rem;
+                margin-bottom: 0.125rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .item-description {
+                font-size: 0.75rem;
+                margin-bottom: 0.25rem;
+                -webkit-line-clamp: 2;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                line-height: 1.3;
+                color: var(--mm-gray-700);
+            }
+            
+            .item-footer {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                margin-top: 0.25rem;
+                width: 100%;
+            }
+            
+            .price-section {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .item-price {
+                font-size: 1rem;
+                font-weight: 700;
+            }
+            
+            .item-meta {
+                font-size: 0.65rem;
+                padding: 0.125rem 0.25rem;
+            }
+            
+            .add-to-cart-btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.7rem;
+                width: auto;
+                margin-top: 0;
+            }
+            
+            /* Restaurant card adjustments */
+            .restaurant-card {
+                padding: var(--space-sm);
+            }
+            
+            .restaurant-dishes-grid {
+                gap: 0.5rem;
+            }
+        }
+        
+        /* Extra small mobile adjustments */
+        @media (max-width: 480px) {
+            .menu-item {
+                gap: 0.5rem;
+                padding: 0.5rem;
+            }
+            
+            .item-image {
+                width: 70px !important;
+                height: 70px !important;
+                min-width: 70px;
+                min-height: 70px;
+            }
+            
+            .item-name {
+                font-size: 0.9rem;
+            }
+            
+            .item-description {
+                font-size: 0.7rem;
+                -webkit-line-clamp: 2;
+            }
+            
+            .item-price {
+                font-size: 0.9rem;
+            }
+            
+            .add-to-cart-btn {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
+            
+            .item-meta {
+                font-size: 0.6rem;
+                padding: 0.1rem 0.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header / Navbar -->
+    <header class="navbar">
+        <div class="container">
+            <div class="navbar-content">
+                <a href="#home" class="logo-container">
+                    <img src="image/MealMomenetlogo.jpeg" alt="MealMoment Logo" class="logo-image">
+                    <div>
+                        <div class="logo-text">MealMoment</div>
+                        <div class="logo-tagline">Fresh • Timely • Delicious</div>
+                    </div>
+                </a>
+                <nav class="nav-links">
+                    <a href="#menu" class="nav-link">Menu</a>
+                    <a href="#how-it-works" class="nav-link">How It Works</a>
+                    <a href="#cart" class="nav-link">Cart</a>
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="owner-dashboard.html" class="nav-link" target="_blank">
+                        <i class="fas fa-store"></i> Restaurant Owners
+                    </a>
+                    <a href="driver.html" class="nav-link" style="color: #FF6A00;">
+                        <i class="fas fa-bike"></i> Become a Driver
+                    </a>
+                    <a href="install.html" class="nav-link" style="color: #2E7D32;">
+                        <i class="fas fa-mobile-alt"></i> Install App
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Fresh Meals, Perfect Timing</h1>
+                <p class="hero-subtitle">
+                    Your menu changes based on the time of day. Breakfast, lunch, or dinner - 
+                    we serve what's perfect for right now.
+                </p>
+                <div class="time-badge">
+                    <i class="fas fa-clock"></i>
+                    <span id="current-time">Loading local time...</span>
+                </div>
+                <div style="margin-top: var(--space-xl);">
+                    <a href="#how-it-works" class="btn btn-primary" style="margin-right: var(--space-sm);">
+                        <i class="fas fa-play-circle btn-icon"></i> Get Started
+                    </a>
+                    <a href="#menu" class="btn btn-secondary">
+                        <i class="fas fa-utensils btn-icon"></i> View Menu
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="main-content">
+            <!-- Sidebar with Steps -->
+            <aside class="sidebar">
+                <h2 id="how-it-works">How It Works</h2>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Enter ZIP Code</h3>
+                    <p>We'll find local restaurant specials in your city with discounted prices</p>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Time-Based Menu</h3>
+                    <p>Menu automatically switches between breakfast, lunch, and dinner</p>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Add to Cart</h3>
+                    <p>Choose from daily restaurant specials at discounted prices</p>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Checkout & Enjoy</h3>
+                    <p>Choose payment method with branch delivery to receive discount.</p>
+                </div>
+
+                <!-- Location Selector - FIXED: No auto-focus -->
+                <div class="location-selector">
+                    <h3><i class="fas fa-map-marker-alt"></i> Find Your Location</h3>
+                    <div class="form-group">
+                        <label for="zip-code">Enter ZIP Code</label>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <input 
+                                type="text" 
+                                id="zip-code" 
+                                inputmode="numeric"
+                                pattern="[0-9]{5}"
+                                placeholder="e.g., 06320" 
+                                maxlength="5"
+                                style="flex: 1; font-size: 16px;"
+                            >
+                            <button type="button" class="btn btn-primary" onclick="findLocation()" id="find-location-btn" style="min-width: 100px;">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div id="zip-error" class="error-message hidden" style="padding: 0.5rem;">
+                            Please enter a valid 5-digit ZIP code
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile-friendly alternative input method -->
+                    <div class="mobile-zip-options" id="mobile-zip-options">
+                        <p>Try these popular ZIP codes:</p>
+                        <div class="zip-buttons">
+                            <button type="button" class="zip-button" onclick="setZipCode('06320')">06320 (New London)</button>
+                            <button type="button" class="zip-button" onclick="setZipCode('90001')">90001 (LA)</button>
+                            <button type="button" class="zip-button" onclick="setZipCode('10001')">10001 (NYC)</button>
+                            <button type="button" class="zip-button" onclick="setZipCode('60601')">60601 (Chicago)</button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Menu Section -->
+            <section class="menu-section menu-scroll-target" id="menu">
+                <div class="menu-header">
+                    <h2 id="city-name">Select Your City</h2>
+                    <div class="time-badge" id="meal-type">
+                        <i class="fas fa-utensils"></i>
+                        <span id="meal-text">Enter ZIP Code First</span>
+                    </div>
+                </div>
+
+                <div id="menu-container">
+                    <div class="loading">
+                        <i class="fas fa-utensils fa-spin"></i>
+                        <p>Please enter your ZIP code to see restaurant specials</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">
+                            <strong>For Restaurant Owners:</strong> 
+                            <a href="owner-dashboard.html" style="color: var(--mm-orange);">Add your dishes here</a>
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Cart Section -->
+        <section class="cart-section" id="cart">
+            <h2><i class="fas fa-shopping-cart"></i> Your Order</h2>
+            <div class="cart-items" id="cart-items">
+                <div class="loading">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>Your cart is empty</p>
+                </div>
+            </div>
+            <div class="cart-total">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Tax (<span id="tax-rate">8.25%</span>):</span>
+                    <span id="tax">$0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Delivery Fee:</span>
+                    <span id="delivery-fee">$2.99</span>
+                </div>
+                <div class="total-row final-total">
+                    <span>Total:</span>
+                    <span id="total">$2.99</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="showCheckout()" id="checkout-btn" disabled style="width: 100%; margin-top: var(--space-lg);">
+                <i class="fas fa-lock btn-icon"></i> Proceed to Checkout
+            </button>
+        </section>
+
+        <!-- Checkout Form -->
+        <div class="checkout-form hidden" id="checkout-form">
+            <h2><i class="fas fa-credit-card"></i> Complete Your Order</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" id="name" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                    <input type="tel" id="phone" placeholder="(123) 456-7890" required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="address"><i class="fas fa-home"></i> Delivery Address</label>
+                    <input type="text" id="address" placeholder="123 Main Street" required>
+                </div>
+                <div class="form-group">
+                    <label for="city"><i class="fas fa-city"></i> City</label>
+                    <input type="text" id="city" placeholder="Los Angeles" required>
+                </div>
+                <div class="form-group">
+                    <label for="state"><i class="fas fa-map"></i> State</label>
+                    <input type="text" id="state" placeholder="CA" required>
+                </div>
+                <div class="form-group">
+                    <label for="zip"><i class="fas fa-mail-bulk"></i> ZIP Code</label>
+                    <input type="text" id="zip" placeholder="90001" required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="instructions"><i class="fas fa-sticky-note"></i> Special Instructions</label>
+                    <textarea id="instructions" rows="3" placeholder="Dietary restrictions, delivery notes, etc."></textarea>
+                </div>
+            </div>
+            
+            <div class="payment-section">
+                <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="card-number">Card Number</label>
+                        <input type="text" id="card-number" placeholder="4242 4242 4242 4242" maxlength="19" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expiry">Expiry Date</label>
+                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cvc">CVC</label>
+                        <input type="text" id="cvc" placeholder="123" maxlength="3" required>
+                    </div>
+                </div>
+            </div>
+
+            <div id="checkout-message"></div>
+            
+            <button class="btn btn-primary" onclick="processPayment()" style="width: 100%;">
+                <i class="fas fa-check-circle btn-icon"></i> Place Order & Pay
+            </button>
+            <button class="btn btn-secondary" onclick="hideCheckout()" style="width: 100%; margin-top: var(--space-sm);">
+                <i class="fas fa-arrow-left btn-icon"></i> Back to Menu
+            </button>
+        </div>
+
+        <!-- Order Confirmation -->
+        <div class="checkout-form hidden" id="order-confirmation">
+            <div class="success-message">
+                <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: var(--space-md);"></i>
+                <h2>Order Confirmed! 🎉</h2>
+                <p id="order-details">Your order is being prepared</p>
+                <p id="delivery-time">Estimated delivery: 45 minutes</p>
+            </div>
+            <button class="btn btn-primary" onclick="startNewOrder()" style="width: 100%;">
+                <i class="fas fa-plus btn-icon"></i> Start New Order
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" id="about">
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="footer-logo">MealMoment</div>
+                    <p style="color: rgba(255, 255, 255, 0.8); margin-top: var(--space-sm);">
+                        Fresh food delivered based on your local time
+                    </p>
+                </div>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 MealMoment. All rights reserved.</p>
+                <p>Fresh • Timely • Delicious</p>
+                <div style="margin-top: var(--space-lg); padding: var(--space-md); background: rgba(255,255,255,0.1); border-radius: var(--radius-md);">
+                    <h3 style="color: white; margin-bottom: var(--space-md); text-align: center;">Join the MealMoment Family</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md);">
+                        <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
+                            <i class="fas fa-bike" style="font-size: 2rem; color: var(--mm-orange); margin-bottom: var(--space-sm);"></i>
+                            <h4 style="color: white; margin-bottom: var(--space-xs);">Become a Driver</h4>
+                            <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                                As a delivery driver, make money and work on your schedule. Sign up in minutes.
+                            </p>
+                            <a href="driver.html" class="btn btn-primary" style="margin-top: var(--space-sm); padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                Start earning
+                            </a>
+                        </div>
+                        <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
+                            <i class="fas fa-store" style="font-size: 2rem; color: var(--mm-green); margin-bottom: var(--space-sm);"></i>
+                            <h4 style="color: white; margin-bottom: var(--space-xs);">Become a Merchant</h4>
+                            <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                                Attract new customers and grow sales, starting with 0% commissions for up to 30 days.
+                            </p>
+                            <a href="owner-dashboard.html" class="btn btn-primary" style="margin-top: var(--space-sm); padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                Sign up for App
+                            </a>
+                        </div>
+                        <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
+                            <i class="fas fa-mobile-alt" style="font-size: 2rem; color: var(--mm-orange-2); margin-bottom: var(--space-sm);"></i>
+                            <h4 style="color: white; margin-bottom: var(--space-xs);">Get the App</h4>
+                            <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                                Experience the best your neighborhood has to offer, all in one app.
+                            </p>
+                            <a href="install.html" class="btn btn-primary" style="margin-top: var(--space-sm); padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                Download Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <p style="font-size: 0.875rem; margin-top: var(--space-lg);">
+                    <a href="owner-dashboard.html" target="_blank" style="color: var(--mm-orange-2);">Restaurant Owners: Add Your Menu</a> • 
+                    <a href="driver.html" target="_blank" style="color: var(--mm-orange-2);">Become a Driver</a> • 
+                    <a href="install.html" target="_blank" style="color: var(--mm-orange-2);">Install App</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ===== FIREBASE CONFIGURATION =====
+        // UPDATED: Changed to your new Firebase project configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlBzb_M6uJwnMHXwv3dz4N5M08Tdk51gg",
+            authDomain: "mealmoment786.firebaseapp.com",
+            projectId: "mealmoment786",
+            storageBucket: "mealmoment786.firebasestorage.app",
+            messagingSenderId: "707371774233",
+            appId: "1:707371774233:web:a94c816e40f8d0a9055588"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // State sales tax rates (fallback if API fails)
+        const stateTaxRates = {
+            'AL': 0.04, 'AK': 0.00, 'AZ': 0.056, 'AR': 0.065, 'CA': 0.0725,
+            'CO': 0.029, 'CT': 0.0635, 'DE': 0.00, 'FL': 0.06, 'GA': 0.04,
+            'HI': 0.04, 'ID': 0.06, 'IL': 0.0625, 'IN': 0.07, 'IA': 0.06,
+            'KS': 0.065, 'KY': 0.06, 'LA': 0.0445, 'ME': 0.055, 'MD': 0.06,
+            'MA': 0.0625, 'MI': 0.06, 'MN': 0.06875, 'MS': 0.07, 'MO': 0.04225,
+            'MT': 0.00, 'NE': 0.055, 'NV': 0.0685, 'NH': 0.00, 'NJ': 0.06625,
+            'NM': 0.05125, 'NY': 0.04, 'NC': 0.0475, 'ND': 0.05, 'OH': 0.0575,
+            'OK': 0.045, 'OR': 0.00, 'PA': 0.06, 'RI': 0.07, 'SC': 0.06,
+            'SD': 0.045, 'TN': 0.07, 'TX': 0.0625, 'UT': 0.061, 'VT': 0.06,
+            'VA': 0.053, 'WA': 0.065, 'WV': 0.06, 'WI': 0.05, 'WY': 0.04,
+            'DC': 0.06, 'PR': 0.115
+        };
+
+        // App State
+        let currentCity = null;
+        let currentCart = JSON.parse(localStorage.getItem('mealMomentCart')) || [];
+        let currentStateTaxRate = 0.0825; // Default 8.25%
+
+        // ===== IMAGE ERROR HANDLER =====
+        function handleImageError(img, dishName) {
+            console.log('Image failed to load:', img.src);
+            img.style.display = 'none';
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="image-fallback">
+                    <i class="fas fa-utensils"></i>
+                    <span>${dishName.substring(0, 15)}</span>
+                </div>
+            `;
+        }
+
+        // ===== 1. DISH CATEGORY BY TIME FUNCTIONS =====
+        function getCurrentMealCategory() {
+            const currentHour = new Date().getHours();
+            console.log('Current hour:', currentHour);
+            
+            if (currentHour >= 5 && currentHour < 11) return 'breakfast';
+            if (currentHour >= 11 && currentHour < 16) return 'lunch'; // FIXED: Changed from 'dinner' to 'lunch'
+            return 'dinner';
+        }
+
+        function filterDishesByMealTime(dishesArray) {
+            const currentCategory = getCurrentMealCategory();
+            console.log('Current meal category:', currentCategory);
+            
+            if (!dishesArray || !Array.isArray(dishesArray)) return [];
+            
+            const filteredDishes = dishesArray.filter(dish => {
+                if (!dish) return false;
+                const dishCategory = dish.category || 'all-day';
+                console.log('Dish:', dish.name, 'Category:', dishCategory);
+                
+                return dishCategory === currentCategory || dishCategory === 'all-day';
+            });
+            
+            console.log('Filtered dishes count:', filteredDishes.length);
+            return filteredDishes;
+        }
+
+        // ===== 2. RESTAURANT OPEN & CLOSE HOURS FUNCTIONS =====
+        async function loadRestaurantBusinessHours(restaurantId) {
+            try {
+                const doc = await db.collection('businessHours').doc(restaurantId).get();
+                if (doc.exists) {
+                    return doc.data();
+                }
+                return null;
+            } catch (error) {
+                console.error('Error loading business hours:', error);
+                return null;
+            }
+        }
+
+        function isRestaurantOpenNow(businessHoursData) {
+            if (!businessHoursData) return true; // Default to open if no hours set
+            
+            if (businessHoursData.is24Hours) return true;
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTime24 = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+            
+            const openingTime = businessHoursData.openingTime || '09:00';
+            const closingTime = businessHoursData.closingTime || '21:00';
+            
+            return currentTime24 >= openingTime && currentTime24 <= closingTime;
+        }
+
+        // ===== 6. DUPLICATE DISH DISPLAY BUG FIX =====
+        async function loadDishesWithoutDuplicates(zipCode, mealType) {
+            try {
+                // Get all approved and active dishes
+                const dishesSnapshot = await db.collection('dishes')
+                    .where('status', '==', 'approved')
+                    .where('isActive', '==', true)
+                    .get();
+                
+                if (dishesSnapshot.empty) {
+                    return { allDishes: [], restaurants: [] };
+                }
+                
+                const dishesMap = new Map();
+                const restaurantMap = new Map();
+                
+                dishesSnapshot.forEach(doc => {
+                    const dish = { id: doc.id, ...doc.data() };
+                    
+                    // Check if dish matches ZIP code
+                    const matchesZip = checkDishMatchesZip(dish, zipCode);
+                    
+                    if (matchesZip) {
+                        // Log dish info for debugging
+                        console.log('Dish loaded:', {
+                            name: dish.name,
+                            category: dish.category,
+                            hasImage: !!dish.imageUrl,
+                            imageUrl: dish.imageUrl,
+                            restaurantName: dish.restaurantName
+                        });
+                        
+                        // Use dish ID as key to prevent duplicates
+                        dishesMap.set(doc.id, dish);
+                        
+                        // Group by restaurant for restaurant cards
+                        const restaurantId = dish.restaurantId;
+                        if (!restaurantMap.has(restaurantId)) {
+                            restaurantMap.set(restaurantId, {
+                                id: restaurantId,
+                                name: dish.restaurantName || 'Unknown Restaurant',
+                                dishes: []
+                            });
+                        }
+                        restaurantMap.get(restaurantId).dishes.push(dish);
+                    }
+                });
+                
+                return {
+                    allDishes: Array.from(dishesMap.values()),
+                    restaurants: Array.from(restaurantMap.values())
+                };
+            } catch (error) {
+                console.error('Error loading dishes without duplicates:', error);
+                return { allDishes: [], restaurants: [] };
+            }
+        }
+
+        function checkDishMatchesZip(dish, zipCode) {
+            if (!dish || !zipCode) return false;
+            if (!dish.restaurantZip) return true;
+            
+            if (Array.isArray(dish.restaurantZip)) {
+                return dish.restaurantZip.includes(zipCode);
+            } else {
+                return dish.restaurantZip === zipCode;
+            }
+        }
+
+        // ===== 7. CART PRE-SELECTED ITEM BUG FIX =====
+        function clearPreSelectedCartItems() {
+            // Clear cart from localStorage
+            localStorage.removeItem('mealMomentCart');
+            currentCart = [];
+            
+            // Update cart display
+            updateCartDisplay();
+            
+            // Show notification
+            showNotification('Cart cleared successfully', 'success');
+        }
+
+        // ===== INITIALIZE APP =====
+        function init() {
+            updateTime();
+            setInterval(updateTime, 60000);
+            updateCartDisplay();
+            
+            // Clear any pre-selected items on init
+            clearPreSelectedCartItems();
+            
+            // Setup ZIP code input event listeners
+            setupZipCodeInput();
+            
+            // Check URL for zip parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const zipParam = urlParams.get('zip');
+            if (zipParam) {
+                setZipCode(zipParam);
+                setTimeout(() => findLocation(), 500);
+            }
+            
+            // Show mobile ZIP options on mobile
+            if (window.innerWidth <= 768) {
+                const mobileOptions = document.getElementById('mobile-zip-options');
+                if (mobileOptions) {
+                    mobileOptions.style.display = 'block';
+                }
+            }
+            
+            // Prevent auto-focus on page load
+            preventAutoFocus();
+        }
+
+        // Prevent auto-focus on page load
+        function preventAutoFocus() {
+            // Remove any existing focus
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+            
+            // Add a small delay and ensure no focus
+            setTimeout(() => {
+                const zipInput = document.getElementById('zip-code');
+                if (zipInput && document.activeElement === zipInput) {
+                    zipInput.blur();
+                }
+            }, 100);
+        }
+
+        // Setup ZIP code input handling
+        function setupZipCodeInput() {
+            const zipInput = document.getElementById('zip-code');
+            if (!zipInput) return;
+            
+            // Add input event listener
+            zipInput.addEventListener('input', function(e) {
+                // Only allow numbers
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Limit to 5 characters
+                if (this.value.length > 5) {
+                    this.value = this.value.slice(0, 5);
+                }
+                
+                // Validate as user types
+                validateZipCodeInput();
+            });
+            
+            // Add enter key support
+            zipInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    findLocation();
+                }
+            });
+            
+            // Make sure input is visible and clickable but not auto-focused
+            zipInput.style.opacity = '1';
+            zipInput.style.pointerEvents = 'auto';
+            
+            // Remove any autofocus attribute
+            zipInput.removeAttribute('autofocus');
+        }
+
+        // Set ZIP code value
+        function setZipCode(zipCode) {
+            const zipInput = document.getElementById('zip-code');
+            if (zipInput) {
+                zipInput.value = zipCode;
+                validateZipCodeInput();
+            }
+        }
+
+        function validateZipCodeInput() {
+            const zipInput = document.getElementById('zip-code');
+            const errorElement = document.getElementById('zip-error');
+            const findButton = document.getElementById('find-location-btn');
+            
+            if (!zipInput || !errorElement || !findButton) return;
+            
+            const value = zipInput.value.trim();
+            
+            // Validate as user types
+            if (value.length === 5 && /^\d{5}$/.test(value)) {
+                // Valid 5-digit ZIP
+                errorElement.classList.add('hidden');
+                findButton.disabled = false;
+                findButton.style.opacity = '1';
+                findButton.style.cursor = 'pointer';
+            } else if (value.length > 0) {
+                // Invalid input
+                errorElement.classList.remove('hidden');
+                findButton.disabled = true;
+                findButton.style.opacity = '0.5';
+                findButton.style.cursor = 'not-allowed';
+            } else {
+                // Empty field
+                errorElement.classList.add('hidden');
+                findButton.disabled = false;
+                findButton.style.opacity = '1';
+                findButton.style.cursor = 'pointer';
+            }
+        }
+
+        // Update Time Display
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            const currentTimeElement = document.getElementById('current-time');
+            if (currentTimeElement) {
+                currentTimeElement.textContent = timeString;
+            }
+            return now.getHours();
+        }
+
+        // GET SALES TAX RATE FOR STATE
+        async function getSalesTaxRate(stateCode) {
+            try {
+                // Check if we have the state in our fallback
+                const stateUpper = stateCode.toUpperCase();
+                if (stateTaxRates[stateUpper]) {
+                    return stateTaxRates[stateUpper];
+                }
+                
+                return 0.0825; // Default 8.25% if state not found
+                
+            } catch (error) {
+                console.error('Error fetching tax rate:', error);
+                // Use fallback
+                const stateUpper = stateCode.toUpperCase();
+                return stateTaxRates[stateUpper] || 0.0825;
+            }
+        }
+
+        // FIND LOCATION USING ZIP CODE API (Works for all USA)
+        async function findLocation() {
+            const zipInput = document.getElementById('zip-code');
+            const errorElement = document.getElementById('zip-error');
+            
+            if (!zipInput || !errorElement) {
+                showNotification('ZIP code input field not found', 'error');
+                return;
+            }
+            
+            const zipValue = zipInput.value.trim();
+            const zipCodePattern = /^\d{5}$/;
+
+            // Basic validation
+            if (!zipCodePattern.test(zipValue)) {
+                errorElement.classList.remove('hidden');
+                showNotification('Please enter a valid 5-digit US ZIP code.', 'error');
+                return;
+            }
+
+            // Get DOM elements with null checks
+            const mealTypeBadge = document.getElementById('meal-type');
+            const cityNameElement = document.getElementById('city-name');
+            const mealTextElement = document.getElementById('meal-text');
+            
+            if (!mealTypeBadge || !cityNameElement || !mealTextElement) {
+                showNotification('Page elements not loaded properly. Please refresh the page.', 'error');
+                return;
+            }
+
+            // Show loading state
+            mealTypeBadge.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Looking up...`;
+            cityNameElement.textContent = `Checking ZIP ${zipValue}...`;
+
+            try {
+                // Use Zippopotam.us API for real ZIP code data
+                const apiUrl = `https://api.zippopotam.us/us/${zipValue}`;
+                const response = await fetch(apiUrl, {
+                    timeout: 10000 // 10 second timeout
+                });
+
+                // Handle HTTP errors
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('ZIP code not found. Please enter a valid US ZIP code.');
+                    } else {
+                        throw new Error('Could not fetch location data. Please try again.');
+                    }
+                }
+
+                const data = await response.json();
+
+                // Process API response
+                if (!data.places || data.places.length === 0) {
+                    throw new Error('No city data found for this ZIP code.');
+                }
+
+                // Get the primary place (first one in array)
+                const primaryPlace = data.places[0];
+                const stateCode = primaryPlace['state abbreviation'];
+                
+                // Get sales tax rate for the state
+                currentStateTaxRate = await getSalesTaxRate(stateCode);
+                
+                // Update tax rate display
+                const taxRateElement = document.getElementById('tax-rate');
+                if (taxRateElement) {
+                    taxRateElement.textContent = `${(currentStateTaxRate * 100).toFixed(2)}%`;
+                }
+                
+                currentCity = {
+                    city: primaryPlace['place name'],
+                    state: stateCode,
+                    stateFull: primaryPlace.state,
+                    timezone: getTimezoneFromState(stateCode),
+                    cityId: 1,
+                    taxRate: currentStateTaxRate
+                };
+
+                // Update UI with real data
+                cityNameElement.textContent = `${currentCity.city}, ${currentCity.state}`;
+
+                // Determine meal type based on time - FIXED: Correct meal times
+                const currentHour = updateTime();
+                let mealText, mealIcon;
+                
+                if (currentHour >= 5 && currentHour < 11) {
+                    mealText = 'BREAKFAST MENU';
+                    mealIcon = '☕';
+                } else if (currentHour >= 11 && currentHour < 16) {
+                    mealText = 'LUNCH MENU'; // FIXED: This should be lunch, not dinner
+                    mealIcon = '🥪';
+                } else {
+                    mealText = 'DINNER MENU';
+                    mealIcon = '🍽️';
+                }
+
+                mealTextElement.textContent = mealText;
+                mealTypeBadge.innerHTML = `<i class="fas fa-utensils"></i> ${mealText} ${mealIcon}`;
+
+                // Load the menu for this ZIP code FROM FIREBASE
+                loadMenu(zipValue, mealText.toLowerCase());
+
+                // Update checkout form with city/state info
+                const cityInput = document.getElementById('city');
+                const stateInput = document.getElementById('state');
+                const zipFormInput = document.getElementById('zip');
+                
+                if (cityInput) cityInput.value = currentCity.city;
+                if (stateInput) stateInput.value = currentCity.state;
+                if (zipFormInput) zipFormInput.value = zipValue;
+
+                errorElement.classList.add('hidden');
+                showNotification(`Restaurant specials loaded for ${currentCity.city}, ${currentCity.state}!`, 'success');
+
+                // FIXED: Scroll to menu section when ZIP code is entered
+                const menuSection = document.getElementById('menu');
+                if (menuSection) {
+                    setTimeout(() => {
+                        menuSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
+                }
+
+            } catch (error) {
+                // Handle errors
+                console.error('Location fetch error:', error);
+                errorElement.classList.remove('hidden');
+                errorElement.textContent = error.message;
+                showNotification(error.message, 'error');
+                
+                // Reset UI to prompt state with null checks
+                if (cityNameElement) cityNameElement.textContent = 'Select Your City';
+                if (mealTextElement) mealTextElement.textContent = 'Enter ZIP Code First';
+                if (mealTypeBadge) mealTypeBadge.innerHTML = `<i class="fas fa-utensils"></i> Enter ZIP Code First`;
+                
+                // For demo purposes, load a default city if API fails
+                if (zipValue === '06320' || zipValue === '90001' || zipValue === '10001') {
+                    setTimeout(() => {
+                        loadDemoCity(zipValue);
+                    }, 500);
+                }
+            }
+        }
+
+        // Load demo city for testing if API fails
+        function loadDemoCity(zipCode) {
+            const demoCities = {
+                '06320': { city: 'New London', state: 'CT' },
+                '90001': { city: 'Los Angeles', state: 'CA' },
+                '10001': { city: 'New York', state: 'NY' },
+                '60601': { city: 'Chicago', state: 'IL' }
+            };
+            
+            if (demoCities[zipCode]) {
+                const demo = demoCities[zipCode];
+                currentCity = {
+                    city: demo.city,
+                    state: demo.state,
+                    cityId: 1,
+                    taxRate: stateTaxRates[demo.state] || 0.0825
+                };
+                
+                // Update UI
+                const cityNameElement = document.getElementById('city-name');
+                const mealTextElement = document.getElementById('meal-text');
+                const mealTypeBadge = document.getElementById('meal-type');
+                const taxRateElement = document.getElementById('tax-rate');
+                
+                if (cityNameElement) cityNameElement.textContent = `${demo.city}, ${demo.state}`;
+                if (taxRateElement) taxRateElement.textContent = `${(currentCity.taxRate * 100).toFixed(2)}%`;
+                
+                // Determine meal type
+                const currentHour = updateTime();
+                let mealText, mealIcon;
+                
+                if (currentHour >= 5 && currentHour < 11) {
+                    mealText = 'BREAKFAST MENU';
+                    mealIcon = '☕';
+                } else if (currentHour >= 11 && currentHour < 16) {
+                    mealText = 'LUNCH MENU'; // FIXED: This should be lunch, not dinner
+                    mealIcon = '🥪';
+                } else {
+                    mealText = 'DINNER MENU';
+                    mealIcon = '🍽️';
+                }
+
+                if (mealTextElement) mealTextElement.textContent = mealText;
+                if (mealTypeBadge) mealTypeBadge.innerHTML = `<i class="fas fa-utensils"></i> ${mealText} ${mealIcon}`;
+
+                // Load menu
+                loadMenu(zipCode, mealText.toLowerCase());
+                
+                showNotification(`Demo mode: Restaurant specials loaded for ${demo.city}, ${demo.state}`, 'info');
+                
+                // FIXED: Scroll to menu section for demo cities too
+                const menuSection = document.getElementById('menu');
+                if (menuSection) {
+                    setTimeout(() => {
+                        menuSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
+                }
+            }
+        }
+
+        // Helper function to estimate timezone from state
+        function getTimezoneFromState(stateAbbr) {
+            const stateTimezones = {
+                // Eastern Time
+                'CT': 'America/New_York', 'DC': 'America/New_York', 'DE': 'America/New_York',
+                'FL': 'America/New_York', 'GA': 'America/New_York', 'IN': 'America/New_York',
+                'KY': 'America/New_York', 'MA': 'America/New_York', 'MD': 'America/New_York',
+                'ME': 'America/New_York', 'MI': 'America/New_York', 'NC': 'America/New_York',
+                'NH': 'America/New_York', 'NJ': 'America/New_York', 'NY': 'America/New_York',
+                'OH': 'America/New_York', 'PA': 'America/New_York', 'RI': 'America/New_York',
+                'SC': 'America/New_York', 'TN': 'America/New_York', 'VT': 'America/New_York',
+                'VA': 'America/New_York', 'WV': 'America/New_York',
+                // Central Time
+                'AL': 'America/Chicago', 'AR': 'America/Chicago', 'IL': 'America/Chicago',
+                'IA': 'America/Chicago', 'KS': 'America/Chicago', 'LA': 'America/Chicago',
+                'MN': 'America/Chicago', 'MS': 'America/Chicago', 'MO': 'America/Chicago',
+                'NE': 'America/Chicago', 'ND': 'America/Chicago', 'OK': 'America/Chicago',
+                'SD': 'America/Chicago', 'TX': 'America/Chicago', 'WI': 'America/Chicago',
+                // Mountain Time
+                'AZ': 'America/Phoenix', 'CO': 'America/Denver', 'ID': 'America/Denver',
+                'MT': 'America/Denver', 'NM': 'America/Denver', 'UT': 'America/Denver',
+                'WY': 'America/Denver',
+                // Pacific Time
+                'CA': 'America/Los_Angeles', 'NV': 'America/Los_Angeles', 'OR': 'America/Los_Angeles',
+                'WA': 'America/Los_Angeles',
+                // Others
+                'AK': 'America/Anchorage', 'HI': 'Pacific/Honolulu',
+                // US Territories
+                'PR': 'America/Puerto_Rico', 'GU': 'Pacific/Guam', 'VI': 'America/St_Thomas',
+                'MP': 'Pacific/Saipan', 'AS': 'Pacific/Pago_Pago'
+            };
+            return stateTimezones[stateAbbr.toUpperCase()] || 'America/New_York';
+        }
+
+        // Load menu from Firebase based on ZIP code - FIXED ERROR HANDLING
+        async function loadMenu(zipCode, mealType) {
+            const menuContainer = document.getElementById('menu-container');
+            if (!menuContainer) {
+                console.error('Menu container not found');
+                return;
+            }
+            
+            // Show loading state
+            menuContainer.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-utensils fa-spin"></i>
+                    <p>Loading restaurant specials for ZIP ${zipCode}...</p>
+                </div>
+            `;
+            
+            try {
+                // Load dishes without duplicates and grouped by restaurant
+                const result = await loadDishesWithoutDuplicates(zipCode, mealType);
+                
+                // Check if result is valid
+                if (!result || !result.allDishes || !Array.isArray(result.allDishes)) {
+                    throw new Error('Invalid data received from server');
+                }
+                
+                const { allDishes, restaurants } = result;
+                
+                if (!allDishes || allDishes.length === 0) {
+                    // No dishes for this ZIP code - show friendly message
+                    menuContainer.innerHTML = `
+                        <div class="message success-message" style="text-align: center;">
+                            <i class="fas fa-map-marker-alt" style="font-size: 3rem; margin-bottom: var(--space-md); color: var(--mm-green);"></i>
+                            <h3 style="color: var(--mm-green);">Coming Soon to Your Area! 🎉</h3>
+                            <p>We're excited to announce that MealMoment will be arriving in <strong>${currentCity?.city || 'your city'}</strong> very soon!</p>
+                            <p>Restaurant owners in your area are currently setting up their menus. Check back in a few days to discover delicious meals.</p>
+                            <p style="margin-top: var(--space-lg); font-size: 0.9rem; color: var(--mm-gray-700);">
+                                <i class="fas fa-lightbulb"></i> <strong>Pro Tip:</strong> Share MealMoment with your favorite local restaurants!
+                            </p>
+                            <div style="margin-top: var(--space-xl);">
+                                <a href="owner-dashboard.html" class="btn btn-primary" target="_blank" style="margin: 0.5rem;">
+                                    <i class="fas fa-store"></i> Add Your Restaurant
+                                </a>
+                                <button class="btn btn-secondary" onclick="setZipCode('90001'); setTimeout(() => findLocation(), 300);">
+                                    <i class="fas fa-search"></i> Try Los Angeles (90001)
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Filter dishes by current meal time
+                const currentMealCategory = getCurrentMealCategory();
+                const filteredDishes = filterDishesByMealTime(allDishes);
+                
+                console.log('All dishes count:', allDishes.length);
+                console.log('Filtered dishes count:', filteredDishes.length);
+                console.log('Current meal category:', currentMealCategory);
+                
+                if (!filteredDishes || filteredDishes.length === 0) {
+                    menuContainer.innerHTML = `
+                        <div class="message info-message">
+                            <i class="fas fa-clock"></i>
+                            <h3>No ${currentMealCategory} items available</h3>
+                            <p>Restaurants haven't added ${currentMealCategory} dishes for this ZIP code yet.</p>
+                            <p>Check back during ${currentMealCategory} hours or try a different ZIP code.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Build menu HTML with restaurant cards
+                let html = '';
+                
+                // Display time-based menu header with correct count
+                html += `<h3><i class="fas fa-clock" style="color: var(--mm-orange);"></i> ${currentMealCategory.toUpperCase()} Menu (${filteredDishes.length} items)</h3>`;
+                
+                // Group filtered dishes by restaurant
+                const filteredRestaurants = [];
+                if (restaurants && Array.isArray(restaurants)) {
+                    restaurants.forEach(restaurant => {
+                        if (restaurant && restaurant.dishes && Array.isArray(restaurant.dishes)) {
+                            const restaurantFilteredDishes = restaurant.dishes.filter(dish => 
+                                dish && filteredDishes.some(filteredDish => filteredDish.id === dish.id)
+                            );
+                            
+                            if (restaurantFilteredDishes.length > 0) {
+                                filteredRestaurants.push({
+                                    ...restaurant,
+                                    dishes: restaurantFilteredDishes
+                                });
+                            }
+                        }
+                    });
+                }
+                
+                // If no restaurants have dishes, show message
+                if (filteredRestaurants.length === 0) {
+                    menuContainer.innerHTML = `
+                        <div class="message info-message">
+                            <i class="fas fa-utensils"></i>
+                            <h3>Menu Coming Soon!</h3>
+                            <p>Restaurants in <strong>${currentCity?.city || 'your area'}</strong> are preparing their special menus.</p>
+                            <p>Check back soon or try a different ZIP code to see available dishes.</p>
+                            <div style="margin-top: var(--space-md);">
+                                <button class="btn btn-secondary" onclick="setZipCode('90001'); setTimeout(() => findLocation(), 300);">
+                                    <i class="fas fa-search"></i> Try Los Angeles (90001)
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display restaurant cards
+                for (const restaurant of filteredRestaurants) {
+                    // Load business hours for this restaurant
+                    const businessHours = await loadRestaurantBusinessHours(restaurant.id);
+                    const isOpen = isRestaurantOpenNow(businessHours);
+                    
+                    // Skip restaurant if it's closed
+                    if (!isOpen && businessHours) continue;
+                    
+                    html += `
+                        <div class="restaurant-card">
+                            <div class="restaurant-header">
+                                <h4 style="margin: 0;">
+                                    <i class="fas fa-store"></i> ${restaurant.name || 'Local Restaurant'}
+                                    ${businessHours ? 
+                                        `<span class="restaurant-status ${isOpen ? 'status-open' : 'status-closed'}">
+                                            ${isOpen ? 'OPEN NOW' : 'CLOSED'}
+                                        </span>` : 
+                                        '<span class="restaurant-status status-open">OPEN</span>'
+                                    }
+                                </h4>
+                                ${businessHours && !businessHours.is24Hours ? 
+                                    `<small style="color: var(--mm-gray-700);">
+                                        Hours: ${businessHours.openingTime || '9:00'} - ${businessHours.closingTime || '21:00'}
+                                    </small>` : 
+                                    ''
+                                }
+                            </div>
+                            <div class="restaurant-dishes-grid">
+                    `;
+                    
+                    // Display restaurant's dishes - UPDATED FOR MOBILE LAYOUT
+                    restaurant.dishes.forEach(item => {
+                        if (!item) return;
+                        
+                        const isInCart = currentCart.some(cartItem => cartItem.id === item.id);
+                        const cartQuantity = isInCart ? currentCart.find(cartItem => cartItem.id === item.id).quantity : 0;
+                        
+                        // Check if we're on mobile
+                        const isMobile = window.innerWidth <= 768;
+                        
+                        if (isMobile) {
+                            // Mobile layout - horizontal like mv.jpeg and mv1.jpeg
+                            html += `
+                                <div class="menu-item">
+                                    <div class="item-image">
+                                        ${item.imageUrl ? 
+                                            `<img src="${item.imageUrl}" alt="${item.name || 'Dish'}" 
+                                                  onerror="handleImageError(this, '${item.name || 'Dish'}')"
+                                                  style="width: 100%; height: 100%; object-fit: cover;">` :
+                                            `<div class="image-fallback">
+                                                <i class="fas fa-utensils"></i>
+                                                <span>${(item.name || 'Dish').substring(0, 10)}</span>
+                                            </div>`
+                                        }
+                                    </div>
+                                    <div class="item-content">
+                                        <h3 class="item-name">${item.name || 'Unnamed Dish'}</h3>
+                                        <p class="item-description">${item.description || ''}</p>
+                                        <div class="item-footer">
+                                            <div class="price-section">
+                                                <div class="item-price">$${item.price ? item.price.toFixed(2) : '0.00'}</div>
+                                                <div class="item-meta">${item.calories || 'N/A'} cal</div>
+                                            </div>
+                                            <button class="add-to-cart-btn" onclick="addToCart('${item.id}')">
+                                                <i class="fas fa-${isInCart ? 'check' : 'plus'}"></i>
+                                                ${isInCart ? `${cartQuantity}` : 'Add'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            // Desktop layout - vertical card
+                            html += `
+                                <div class="menu-item">
+                                    <div class="item-image">
+                                        ${item.imageUrl ? 
+                                            `<img src="${item.imageUrl}" alt="${item.name || 'Dish'}" 
+                                                  onerror="handleImageError(this, '${item.name || 'Dish'}')"
+                                                  style="width: 100%; height: 100%; object-fit: cover;">` :
+                                            `<div class="image-fallback">
+                                                <i class="fas fa-utensils"></i>
+                                                <span>${(item.name || 'Dish').substring(0, 15)}</span>
+                                            </div>`
+                                        }
+                                    </div>
+                                    <h3 class="item-name">${item.name || 'Unnamed Dish'}</h3>
+                                    <p class="item-description">${item.description || ''}</p>
+                                    <div class="item-footer">
+                                        <div>
+                                            <div class="item-price">$${item.price ? item.price.toFixed(2) : '0.00'}</div>
+                                            <div class="item-meta">${item.calories || 'N/A'} cal • ${item.cuisine || 'Various'} • ${item.category || 'all-day'}</div>
+                                        </div>
+                                        <button class="add-to-cart-btn" onclick="addToCart('${item.id}')">
+                                            <i class="fas fa-${isInCart ? 'check' : 'plus'}"></i>
+                                            ${isInCart ? `${cartQuantity} in cart` : 'Add to cart'}
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // If no restaurants are open, show message
+                if (!html.includes('menu-item')) {
+                    menuContainer.innerHTML = `
+                        <div class="message info-message">
+                            <i class="fas fa-clock"></i>
+                            <h3>All restaurants are currently closed</h3>
+                            <p>No restaurants are open at this time. Please check back during regular business hours.</p>
+                            <p>Most restaurants open between 9:00 AM and 9:00 PM.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                menuContainer.innerHTML = html;
+                updateCheckoutButton();
+                
+                // Show success message with correct count
+                showNotification(`Found ${filteredDishes.length} ${currentMealCategory} items from ${filteredRestaurants.length} restaurants!`, 'success');
+                
+            } catch (error) {
+                console.error('Error loading menu from Firebase:', error);
+                // Show friendly error message
+                menuContainer.innerHTML = `
+                    <div class="message success-message" style="text-align: center;">
+                        <i class="fas fa-utensils" style="font-size: 3rem; margin-bottom: var(--space-md); color: var(--mm-green);"></i>
+                        <h3 style="color: var(--mm-green);">Great News! MealMoment is Expanding! 🎉</h3>
+                        <p>We're currently setting up restaurant partnerships in <strong>${currentCity?.city || 'your area'}</strong>.</p>
+                        <p>Check back in a few days to discover delicious meals from local restaurants.</p>
+                        <p style="margin-top: var(--space-lg); font-size: 0.9rem; color: var(--mm-gray-700);">
+                            <i class="fas fa-lightbulb"></i> <strong>Want food faster?</strong> Try one of these popular ZIP codes:
+                        </p>
+                        <div class="zip-buttons" style="margin-top: var(--space-md); justify-content: center;">
+                            <button class="zip-button" onclick="setZipCode('90001'); setTimeout(() => findLocation(), 300);">Los Angeles (90001)</button>
+                            <button class="zip-button" onclick="setZipCode('10001'); setTimeout(() => findLocation(), 300);">New York (10001)</button>
+                            <button class="zip-button" onclick="setZipCode('60601'); setTimeout(() => findLocation(), 300);">Chicago (60601)</button>
+                        </div>
+                        <div style="margin-top: var(--space-xl);">
+                            <a href="owner-dashboard.html" class="btn btn-primary" target="_blank">
+                                <i class="fas fa-store"></i> Add Your Restaurant
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Add item to cart from Firebase
+        async function addToCart(itemId) {
+            try {
+                // Get dish from Firebase
+                const dishDoc = await db.collection('dishes').doc(itemId).get();
+                if (!dishDoc.exists) {
+                    showNotification('Dish not found', 'error');
+                    return;
+                }
+                
+                const item = dishDoc.data();
+                item.id = itemId;
+                
+                const existingItem = currentCart.find(cartItem => cartItem.id === itemId);
+                
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    currentCart.push({
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        quantity: 1,
+                        restaurantName: item.restaurantName,
+                        restaurantId: item.restaurantId
+                    });
+                }
+                
+                localStorage.setItem('mealMomentCart', JSON.stringify(currentCart));
+                updateCartDisplay();
+                
+                // Reload menu to update cart counts
+                const zipCode = document.getElementById('zip-code').value;
+                if (zipCode) {
+                    const currentHour = updateTime();
+                    let mealType = 'dinner';
+                    if (currentHour >= 5 && currentHour < 11) mealType = 'breakfast';
+                    else if (currentHour >= 11 && currentHour < 16) mealType = 'lunch'; // FIXED: Correct meal type
+                    else mealType = 'dinner';
+                    loadMenu(zipCode, mealType);
+                }
+                
+                showNotification(`${item.name} added to cart!`, 'success');
+            } catch (error) {
+                console.error('Error adding item to cart:', error);
+                showNotification('Error adding item to cart', 'error');
+            }
+        }
+
+        // Update cart quantity
+        function updateCartQuantity(itemId, change) {
+            const itemIndex = currentCart.findIndex(item => item.id === itemId);
+            if (itemIndex === -1) return;
+            
+            currentCart[itemIndex].quantity += change;
+            
+            if (currentCart[itemIndex].quantity <= 0) {
+                currentCart.splice(itemIndex, 1);
+            }
+            
+            localStorage.setItem('mealMomentCart', JSON.stringify(currentCart));
+            updateCartDisplay();
+            
+            // Reload menu to update cart counts
+            const zipCode = document.getElementById('zip-code').value;
+            if (zipCode) {
+                const currentHour = updateTime();
+                let mealType = 'dinner';
+                if (currentHour >= 5 && currentHour < 11) mealType = 'breakfast';
+                else if (currentHour >= 11 && currentHour < 16) mealType = 'lunch'; // FIXED: Correct meal type
+                else mealType = 'dinner';
+                loadMenu(zipCode, mealType);
+            }
+            
+            showNotification('Cart updated');
+        }
+
+        // Update cart display
+        function updateCartDisplay() {
+            const cartContainer = document.getElementById('cart-items');
+            const subtotalEl = document.getElementById('subtotal');
+            const taxEl = document.getElementById('tax');
+            const totalEl = document.getElementById('total');
+            
+            if (!cartContainer || !subtotalEl || !taxEl || !totalEl) {
+                console.error('Cart elements not found');
+                return;
+            }
+            
+            if (currentCart.length === 0) {
+                cartContainer.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>Your cart is empty</p>
+                    </div>
+                `;
+                subtotalEl.textContent = '$0.00';
+                taxEl.textContent = '$0.00';
+                totalEl.textContent = '$2.99';
+                updateCheckoutButton();
+                return;
+            }
+            
+            // Calculate totals
+            let subtotal = 0;
+            currentCart.forEach(item => {
+                subtotal += item.price * item.quantity;
+            });
+            
+            const tax = subtotal * currentStateTaxRate;
+            const deliveryFee = 2.99;
+            const total = subtotal + tax + deliveryFee;
+            
+            // Update totals display
+            subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+            taxEl.textContent = `$${tax.toFixed(2)}`;
+            totalEl.textContent = `$${total.toFixed(2)}`;
+            
+            // Build cart items HTML
+            let cartHTML = '';
+            currentCart.forEach(item => {
+                cartHTML += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <div style="color: var(--mm-green); font-weight: 500;">$${item.price.toFixed(2)} each</div>
+                            ${item.restaurantName ? `<div style="font-size: 0.875rem; color: var(--mm-gray-700);">${item.restaurantName}</div>` : ''}
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', -1)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span style="font-weight: 600; min-width: 30px; text-align: center;">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', 1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div style="font-weight: 700; color: var(--mm-charcoal);">
+                            $${(item.price * item.quantity).toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            cartContainer.innerHTML = cartHTML;
+            updateCheckoutButton();
+        }
+
+        function updateCheckoutButton() {
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (!checkoutBtn) return;
+            
+            if (currentCart.length > 0 && currentCity) {
+                checkoutBtn.disabled = false;
+                checkoutBtn.style.opacity = '1';
+                checkoutBtn.style.cursor = 'pointer';
+            } else {
+                checkoutBtn.disabled = true;
+                checkoutBtn.style.opacity = '0.5';
+                checkoutBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // Checkout Functions
+        function showCheckout() {
+            if (currentCart.length === 0) {
+                showNotification('Your cart is empty!', 'error');
+                return;
+            }
+            
+            if (!currentCity) {
+                showNotification('Please select your location first!', 'error');
+                return;
+            }
+            
+            const checkoutForm = document.getElementById('checkout-form');
+            if (checkoutForm) {
+                checkoutForm.classList.remove('hidden');
+                checkoutForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function hideCheckout() {
+            const checkoutForm = document.getElementById('checkout-form');
+            if (checkoutForm) {
+                checkoutForm.classList.add('hidden');
+            }
+        }
+
+        // Process payment and save order to Firebase
+        async function processPayment() {
+            const name = document.getElementById('name');
+            const phone = document.getElementById('phone');
+            const address = document.getElementById('address');
+            const city = document.getElementById('city');
+            const state = document.getElementById('state');
+            const zip = document.getElementById('zip');
+            
+            if (!name || !phone || !address || !city || !state || !zip) {
+                showCheckoutMessage('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (!name.value.trim() || !phone.value.trim() || !address.value.trim() || 
+                !city.value.trim() || !state.value.trim() || !zip.value.trim()) {
+                showCheckoutMessage('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            showCheckoutMessage('Processing payment...', 'info');
+            
+            try {
+                // Create order data
+                const orderNumber = 'MM-' + Date.now().toString().slice(-8);
+                const deliveryTime = new Date(Date.now() + 45 * 60000);
+                
+                // Get unique restaurant IDs from cart
+                const restaurantIds = [...new Set(currentCart.map(item => item.restaurantId).filter(id => id))];
+                
+                const orderData = {
+                    orderNumber: orderNumber,
+                    customerName: name.value.trim(),
+                    customerPhone: phone.value.trim(),
+                    deliveryAddress: `${address.value.trim()}, ${city.value.trim()}, ${state.value.trim()} ${zip.value.trim()}`,
+                    specialInstructions: document.getElementById('instructions').value.trim() || '',
+                    items: currentCart.map(item => ({
+                        name: item.name,
+                        price: item.price,
+                        quantity: item.quantity,
+                        restaurantId: item.restaurantId,
+                        restaurantName: item.restaurantName
+                    })),
+                    subtotal: parseFloat(document.getElementById('subtotal').textContent.replace('$', '')),
+                    tax: parseFloat(document.getElementById('tax').textContent.replace('$', '')),
+                    deliveryFee: 2.99,
+                    total: parseFloat(document.getElementById('total').textContent.replace('$', '')),
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    estimatedDelivery: deliveryTime,
+                    restaurantIds: restaurantIds
+                };
+                
+                // Save order to Firebase
+                await db.collection('orders').add(orderData);
+                
+                // Clear cart and show confirmation
+                currentCart = [];
+                localStorage.setItem('mealMomentCart', JSON.stringify([]));
+                
+                const checkoutForm = document.getElementById('checkout-form');
+                const orderConfirmation = document.getElementById('order-confirmation');
+                
+                if (checkoutForm) checkoutForm.classList.add('hidden');
+                if (orderConfirmation) orderConfirmation.classList.remove('hidden');
+                
+                const orderDetails = document.getElementById('order-details');
+                const deliveryTimeElement = document.getElementById('delivery-time');
+                
+                if (orderDetails) {
+                    orderDetails.innerHTML = `
+                        Order #${orderNumber}<br>
+                        <small>${orderData.items.length} items • $${orderData.total.toFixed(2)}</small>
+                    `;
+                }
+                
+                if (deliveryTimeElement) {
+                    deliveryTimeElement.textContent = `Estimated delivery: ${deliveryTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                }
+                
+                updateCartDisplay();
+                
+                if (orderConfirmation) {
+                    orderConfirmation.scrollIntoView({ behavior: 'smooth' });
+                }
+                
+                showCheckoutMessage('Order placed successfully! Restaurant owners have been notified.', 'success');
+                
+            } catch (error) {
+                console.error('Error processing payment:', error);
+                showCheckoutMessage('Error processing payment. Please try again.', 'error');
+            }
+        }
+
+        function showCheckoutMessage(message, type) {
+            const messageEl = document.getElementById('checkout-message');
+            if (!messageEl) return;
+            
+            messageEl.innerHTML = `
+                <div class="${type}-message">
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            
+            if (type !== 'info') {
+                setTimeout(() => {
+                    messageEl.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        function startNewOrder() {
+            const orderConfirmation = document.getElementById('order-confirmation');
+            const checkoutForm = document.getElementById('checkout-form');
+            
+            if (orderConfirmation) orderConfirmation.classList.add('hidden');
+            if (checkoutForm) checkoutForm.classList.add('hidden');
+            
+            const name = document.getElementById('name');
+            const phone = document.getElementById('phone');
+            const address = document.getElementById('address');
+            const instructions = document.getElementById('instructions');
+            const cardNumber = document.getElementById('card-number');
+            const expiry = document.getElementById('expiry');
+            const cvc = document.getElementById('cvc');
+            
+            if (name) name.value = '';
+            if (phone) phone.value = '';
+            if (address) address.value = '';
+            if (instructions) instructions.value = '';
+            if (cardNumber) cardNumber.value = '';
+            if (expiry) expiry.value = '';
+            if (cvc) cvc.value = '';
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Notification System
+        function showNotification(message, type = 'success') {
+            const existing = document.querySelector('.notification');
+            if (existing) existing.remove();
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize on load
+        window.onload = init;
+
+        // ===== PWA SERVICE WORKER REGISTRATION =====
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js')
+              .then(function(registration) {
+                console.log('MealMoment app installed successfully!');
+              })
+              .catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+              });
+          });
+        }
+
+        // Show install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+          // Prevent Chrome 67 and earlier from automatically showing the prompt
+          e.preventDefault();
+          // Stash the event so it can be triggered later
+          deferredPrompt = e;
+          
+          // Show install button (optional)
+          setTimeout(() => {
+            showNotification('📱 Add MealMoment to your home screen for quick access!', 'info');
+          }, 5000);
+        });
+    </script>
+</body>
+</html>
