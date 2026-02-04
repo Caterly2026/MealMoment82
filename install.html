@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 Install MealMoment Apps</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #FF6A00 0%, #2E7D32 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid #2E7D32;
+        }
+        
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        h1 {
+            color: #2E7D32;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+        
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .app-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+        }
+        
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+        }
+        
+        .customer .app-icon { background: #2E7D32; }
+        .owner .app-icon { background: #FF6A00; }
+        .driver .app-icon { background: #2196F3; }
+        
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .app-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        
+        .install-btn {
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            font-size: 1rem;
+        }
+        
+        .install-btn:hover {
+            background: #1B5E20;
+        }
+        
+        .instructions {
+            background: #e8f5e9;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 40px;
+            border-left: 5px solid #2E7D32;
+        }
+        
+        .instructions h3 {
+            color: #2E7D32;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            color: #555;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .mobile-note {
+            background: #fff3e0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 5px solid #FF6A00;
+            text-align: center;
+        }
+        
+        .mobile-note h3 {
+            color: #FF6A00;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .app-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="image/MealMomenetlogo.jpeg" alt="MealMoment Logo">
+            </div>
+            <h1>📱 Install MealMoment</h1>
+            <p class="subtitle">Three apps, one amazing food experience!</p>
+        </div>
+        
+        <div class="apps-grid">
+            <!-- Customer App -->
+            <div class="app-card customer" onclick="installCustomerApp()">
+                <div class="app-icon">🍽️</div>
+                <h3 class="app-title">Customer App</h3>
+                <p class="app-description">
+                    Order fresh meals based on local time. Breakfast, lunch, or dinner - 
+                    we serve what's perfect for right now.
+                </p>
+                <button class="install-btn">Install Customer App</button>
+            </div>
+            
+            <!-- Owner Dashboard -->
+            <div class="app-card owner" onclick="installOwnerApp()">
+                <div class="app-icon">🏪</div>
+                <h3 class="app-title">Restaurant Owner</h3>
+                <p class="app-description">
+                    Manage your restaurant, add dishes, track orders, and grow your 
+                    business with MealMoment.
+                </p>
+                <button class="install-btn">Install Owner Dashboard</button>
+            </div>
+            
+            <!-- Driver App -->
+            <div class="app-card driver" onclick="installDriverApp()">
+                <div class="app-icon">🚚</div>
+                <h3 class="app-title">Delivery Driver</h3>
+                <p class="app-description">
+                    Earn money delivering food. Flexible hours, good pay, and 
+                    be part of the MealMoment family.
+                </p>
+                <button class="install-btn">Install Driver App</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>📖 How to Install (Mobile & Desktop)</h3>
+            <ol>
+                <li><strong>Chrome/Edge:</strong> Click the install button above, then click "Install" in the browser prompt</li>
+                <li><strong>iPhone/iPad:</strong> Tap the Share button (📤) and select "Add to Home Screen"</li>
+                <li><strong>Android:</strong> Tap the menu (⋮) and select "Install app" or "Add to Home Screen"</li>
+                <li><strong>Desktop:</strong> Look for the install icon (＋) in the address bar and click it</li>
+            </ol>
+        </div>
+        
+        <div class="mobile-note">
+            <h3>📱 Mobile Users</h3>
+            <p>For best experience, install each app separately to your home screen. They work offline too!</p>
+        </div>
+    </div>
+
+    <script>
+        // Check if PWA is supported
+        if ('serviceWorker' in navigator) {
+            // Register service worker
+            navigator.serviceWorker.register('sw.js')
+                .then(function(registration) {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch(function(error) {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+        
+        // Install prompts
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install buttons
+            document.querySelectorAll('.install-btn').forEach(btn => {
+                btn.style.display = 'block';
+            });
+        });
+        
+        // Install Customer App
+        function installCustomerApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Customer app installed');
+                        alert('🎉 Customer App installed successfully!');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                // Redirect to main app
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // Install Owner Dashboard
+        function installOwnerApp() {
+            // Open owner dashboard
+            window.open('owner-dashboard.html', '_blank');
+            
+            // Try to trigger install
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Owner app installed');
+                        alert('🎉 Owner Dashboard installed successfully!');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+        
+        // Install Driver App
+        function installDriverApp() {
+            // Open driver app
+            window.open('driver.html', '_blank');
+            
+            // Try to trigger install
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Driver app installed');
+                        alert('🎉 Driver App installed successfully!');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+        
+        // Auto-detect device and show appropriate message
+        window.onload = function() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // Show mobile-specific instructions
+                const mobileNote = document.querySelector('.mobile-note');
+                mobileNote.innerHTML = `
+                    <h3>📱 For iPhone & Android Users</h3>
+                    <p><strong>To install:</strong> Tap the Share button (📤) then "Add to Home Screen"</p>
+                    <p><strong>Pro tip:</strong> Install all 3 apps - they work great together!</p>
+                `;
+            }
+            
+            // Check if apps are already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                // Already installed
+                document.querySelector('h1').textContent = '✅ MealMoment Installed';
+                document.querySelector('.subtitle').textContent = 'Your apps are ready to use!';
+            }
+        };
+    </script>
+</body>
+</html>
