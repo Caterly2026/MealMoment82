@@ -801,6 +801,17 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        /* Card Images */
+        .card-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: var(--space-sm);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+        }
+
         /* ===== UTILITY CLASSES ===== */
         .hidden {
             display: none !important;
@@ -1054,6 +1065,12 @@
                 font-size: 0.7rem;
                 padding: 0.2rem 0.5rem;
             }
+            
+            /* Card images on mobile */
+            .card-image {
+                width: 70px;
+                height: 70px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -1139,6 +1156,12 @@
                 font-size: 0.75rem;
                 padding: 0.3rem 0.6rem;
             }
+            
+            /* Card images on extra small screens */
+            .card-image {
+                width: 60px;
+                height: 60px;
+            }
         }
 
         @media (max-width: 400px) {
@@ -1212,6 +1235,12 @@
             
             .item-meta {
                 font-size: 0.65rem;
+            }
+            
+            /* Card images on ultra small screens */
+            .card-image {
+                width: 50px;
+                height: 50px;
             }
         }
 
@@ -1717,8 +1746,9 @@
                 <div style="margin-top: var(--space-lg); padding: var(--space-md); background: rgba(255,255,255,0.1); border-radius: var(--radius-md);">
                     <h3 style="color: white; margin-bottom: var(--space-md); text-align: center;">Join the MealMoment Family</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md);">
+                        <!-- Become a Driver Card - UPDATED: Added image above heading -->
                         <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
-                            <i class="fas fa-bike" style="font-size: 2rem; color: var(--mm-orange); margin-bottom: var(--space-sm);"></i>
+                            <img src="image/MealMomentDriverlogo.jpeg" alt="Driver Logo" class="card-image">
                             <h4 style="color: white; margin-bottom: var(--space-xs);">Become a Driver</h4>
                             <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
                                 As a delivery driver, make money and work on your schedule. Sign up in minutes.
@@ -1727,8 +1757,10 @@
                                 Start earning
                             </a>
                         </div>
+                        
+                        <!-- Become a Merchant Card - UPDATED: Replaced icon with image -->
                         <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
-                            <i class="fas fa-store" style="font-size: 2rem; color: var(--mm-green); margin-bottom: var(--space-sm);"></i>
+                            <img src="image/MealMomentRest.jpeg" alt="Restaurant Logo" class="card-image">
                             <h4 style="color: white; margin-bottom: var(--space-xs);">Become a Merchant</h4>
                             <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
                                 Attract new customers and grow sales, starting with 0% commissions for up to 30 days.
@@ -1737,6 +1769,8 @@
                                 Sign up for App
                             </a>
                         </div>
+                        
+                        <!-- Get the App Card - UNCHANGED -->
                         <div style="text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
                             <i class="fas fa-mobile-alt" style="font-size: 2rem; color: var(--mm-orange-2); margin-bottom: var(--space-sm);"></i>
                             <h4 style="color: white; margin-bottom: var(--space-xs);">Get the App</h4>
