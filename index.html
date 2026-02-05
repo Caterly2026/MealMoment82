@@ -2803,7 +2803,8 @@
             }
         }
 
-        // Process payment and save order to Firebase - UPDATED: Changed delivery fee from 2.99 to 5.99
+        // ===== UPDATED PAYMENT PROCESSING FUNCTION =====
+        // TEST VERSION - For testing orders in dashboard
         async function processPayment() {
             const name = document.getElementById('name');
             const phone = document.getElementById('phone');
@@ -2826,8 +2827,8 @@
             showCheckoutMessage('Processing payment...', 'info');
             
             try {
-                // Create order data
-                const orderNumber = 'MM-' + Date.now().toString().slice(-8);
+                // Create order data (TEST VERSION - skips actual payment)
+                const orderNumber = 'TEST-' + Date.now().toString().slice(-8);
                 const deliveryTime = new Date(Date.now() + 45 * 60000);
                 
                 // Get unique restaurant IDs from cart
@@ -2848,13 +2849,17 @@
                     })),
                     subtotal: parseFloat(document.getElementById('subtotal').textContent.replace('$', '')),
                     tax: parseFloat(document.getElementById('tax').textContent.replace('$', '')),
-                    deliveryFee: 5.99, // UPDATED: Changed from 2.99 to 5.99
+                    deliveryFee: 5.99,
                     total: parseFloat(document.getElementById('total').textContent.replace('$', '')),
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     estimatedDelivery: deliveryTime,
-                    restaurantIds: restaurantIds
+                    restaurantIds: restaurantIds,
+                    // Add test flag for easy identification
+                    testOrder: true
                 };
+                
+                console.log('Saving test order to Firebase:', orderData);
                 
                 // Save order to Firebase
                 await db.collection('orders').add(orderData);
@@ -2875,7 +2880,8 @@
                 if (orderDetails) {
                     orderDetails.innerHTML = `
                         Order #${orderNumber}<br>
-                        <small>${orderData.items.length} items • $${orderData.total.toFixed(2)}</small>
+                        <small>${orderData.items.length} items • $${orderData.total.toFixed(2)}</small><br>
+                        <small style="color: orange;">(TEST ORDER - Payment bypassed)</small>
                     `;
                 }
                 
@@ -2889,11 +2895,19 @@
                     orderConfirmation.scrollIntoView({ behavior: 'smooth' });
                 }
                 
-                showCheckoutMessage('Order placed successfully! Restaurant owners have been notified.', 'success');
+                showCheckoutMessage('✅ TEST ORDER placed successfully! Restaurant owners have been notified.', 'success');
+                
+                // Log to console for debugging
+                console.log('Order saved successfully. Check Firebase Firestore "orders" collection.');
+                console.log('Restaurant IDs to check:', restaurantIds);
                 
             } catch (error) {
                 console.error('Error processing payment:', error);
-                showCheckoutMessage('Error processing payment. Please try again.', 'error');
+                showCheckoutMessage('Error processing payment: ' + error.message, 'error');
+                
+                // Show detailed error in console
+                console.error('Full error details:', error);
+                console.log('Check Firebase permissions and connectivity');
             }
         }
 
