@@ -9,6 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
     <style>
         /* CSS RESET & VARIABLES */
         :root {
@@ -214,6 +219,30 @@
             padding: 8px 16px;
             font-size: 0.9rem;
             min-height: 40px;
+        }
+
+        .google-signin-btn {
+            background: white;
+            color: #757575;
+            border: 2px solid #ddd;
+            border-radius: var(--radius-md);
+            padding: 14px 24px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 50px;
+        }
+
+        .google-signin-btn:hover {
+            background: #f8f9fa;
+            border-color: #ccc;
         }
 
         /* CARDS */
@@ -607,6 +636,24 @@
                     <span style="color: var(--gray);">OR</span>
                 </div>
 
+                <!-- GOOGLE SIGN IN BUTTON -->
+                <button id="google-signin-btn" class="google-signin-btn mb-3">
+                    <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                        <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+                            <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
+                            <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
+                            <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
+                            <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
+                        </g>
+                    </svg>
+                    Sign in with Google
+                </button>
+
+                <div class="text-center mb-3">
+                    <span style="color: var(--gray);">OR</span>
+                </div>
+
+                <!-- EMAIL LOGIN -->
                 <div class="form-group">
                     <label for="email" class="form-label">
                         <i class="fas fa-envelope"></i> Email
@@ -802,6 +849,22 @@
     </main>
 
     <script>
+        // ===== FIREBASE CONFIGURATION =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDT9tVci1qav_5edsFXEjEC7xPXXwTFg2g",
+            authDomain: "mealmoment82.firebaseapp.com",
+            projectId: "mealmoment82",
+            storageBucket: "mealmoment82.firebasestorage.app",
+            messagingSenderId: "40590092728",
+            appId: "1:40590092728:web:0aa8ba4a6aec1f5c25474d",
+            measurementId: "G-0SSF0NMKFV"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ===== APPLICATION STATE =====
         let currentDriver = null;
         let driverInfo = null;
@@ -813,35 +876,37 @@
         // ===== INITIALIZE APPLICATION =====
         document.addEventListener('DOMContentLoaded', function() {
             console.log('MealMoment Driver App Initializing...');
-            checkAuthState();
-            setupEventListeners();
             
-            // Try to restore from localStorage
-            const savedState = localStorage.getItem('mealmoment_driver_demo');
-            if (savedState) {
-                const state = JSON.parse(savedState);
-                if (state.demoMode && state.driverInfo) {
-                    demoMode = true;
-                    driverInfo = state.driverInfo;
-                    showDashboard();
-                    updateDriverUI();
+            // Set up Firebase auth state listener
+            auth.onAuthStateChanged((user) => {
+                console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+                if (user) {
+                    currentDriver = user;
+                    loadDriverInfo();
+                } else {
+                    currentDriver = null;
+                    // Check for demo mode
+                    const savedState = localStorage.getItem('mealmoment_driver_demo');
+                    if (savedState) {
+                        const state = JSON.parse(savedState);
+                        if (state.demoMode && state.driverInfo) {
+                            demoMode = true;
+                            driverInfo = state.driverInfo;
+                            showDashboard();
+                            updateDriverUI();
+                        }
+                    }
                 }
-            }
+            });
+            
+            setupEventListeners();
         });
-
-        function checkAuthState() {
-            // For demo, we'll check localStorage
-            const user = localStorage.getItem('mealmoment_driver_user');
-            if (user) {
-                currentDriver = JSON.parse(user);
-                loadDriverInfo();
-            }
-        }
 
         function setupEventListeners() {
             // Login
             document.getElementById('demo-btn').addEventListener('click', enableDemoMode);
-            document.getElementById('login-btn').addEventListener('click', login);
+            document.getElementById('google-signin-btn').addEventListener('click', signInWithGoogle);
+            document.getElementById('login-btn').addEventListener('click', loginWithEmail);
             document.getElementById('register-btn').addEventListener('click', showRegister);
             
             // Dashboard
@@ -857,6 +922,101 @@
         }
 
         // ===== AUTHENTICATION =====
+        async function signInWithGoogle() {
+            const messageEl = document.getElementById('login-message');
+            showMessage(messageEl, 'Signing in with Google...', 'info');
+            
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                currentDriver = result.user;
+                
+                console.log('Google sign in successful:', currentDriver.uid);
+                
+                // Check if driver document exists
+                const driverRef = db.collection('drivers').doc(currentDriver.uid);
+                const driverDoc = await driverRef.get();
+                
+                if (!driverDoc.exists) {
+                    // Create new driver document
+                    const driverData = {
+                        name: result.user.displayName || 'Driver',
+                        email: result.user.email,
+                        phone: '',
+                        vehicle: 'car',
+                        zipCode: '90001',
+                        isOnline: false,
+                        status: 'offline',
+                        rating: 4.8,
+                        totalDeliveries: 0,
+                        totalEarnings: 0,
+                        todayEarnings: 0,
+                        todayDeliveries: 0,
+                        weeklyEarnings: 0,
+                        acceptanceRate: 100,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        userId: currentDriver.uid,
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    await driverRef.set(driverData);
+                    driverInfo = driverData;
+                } else {
+                    driverInfo = driverDoc.data();
+                    // Update last login
+                    await driverRef.update({
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                demoMode = false;
+                localStorage.removeItem('mealmoment_driver_demo');
+                
+                showDashboard();
+                updateDriverUI();
+                
+                showMessage(messageEl, 'Signed in successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Google sign in error:', error);
+                showMessage(messageEl, 'Error signing in with Google: ' + error.message, 'error');
+            }
+        }
+
+        async function loginWithEmail() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageEl = document.getElementById('login-message');
+            
+            if (!email || !password) {
+                showMessage(messageEl, 'Please enter email and password', 'error');
+                return;
+            }
+            
+            showMessage(messageEl, 'Logging in...', 'info');
+            
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                currentDriver = userCredential.user;
+                
+                console.log('Email login successful:', currentDriver.uid);
+                
+                await loadDriverInfo();
+                showDashboard();
+                
+                showMessage(messageEl, 'Logged in successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    showMessage(messageEl, 'Invalid email or password', 'error');
+                } else {
+                    showMessage(messageEl, 'Error: ' + error.message, 'error');
+                }
+            }
+        }
+
         function enableDemoMode() {
             console.log('Enabling Demo Mode...');
             demoMode = true;
@@ -881,13 +1041,15 @@
                 email: 'demo@mealmoment.com'
             };
             
+            // Save demo state to localStorage
             localStorage.setItem('mealmoment_driver_demo', JSON.stringify({
                 demoMode: true,
                 driverInfo: driverInfo,
                 timestamp: Date.now()
             }));
             
-            localStorage.setItem('mealmoment_driver_user', JSON.stringify(currentDriver));
+            // Sign out of Firebase if logged in
+            auth.signOut();
             
             showDashboard();
             updateDriverUI();
@@ -897,65 +1059,90 @@
             showMessage('login-message', 'Demo mode activated! 🚗 Ready to deliver?', 'success');
         }
 
-        function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const messageEl = document.getElementById('login-message');
+        async function loadDriverInfo() {
+            if (!currentDriver) return;
             
-            if (!email || !password) {
-                showMessage(messageEl, 'Please enter email and password', 'error');
-                return;
+            try {
+                if (demoMode) {
+                    // Already loaded in demo mode
+                    return;
+                }
+                
+                console.log('Loading driver info for:', currentDriver.uid);
+                
+                const driverRef = db.collection('drivers').doc(currentDriver.uid);
+                const driverDoc = await driverRef.get();
+                
+                if (driverDoc.exists) {
+                    driverInfo = driverDoc.data();
+                    console.log('Driver info loaded:', driverInfo);
+                    
+                    updateDriverUI();
+                    
+                    isOnline = driverInfo.isOnline || false;
+                    updateOnlineToggle();
+                    
+                    if (isOnline) {
+                        loadAvailableDeliveries();
+                    }
+                    
+                } else {
+                    console.log('Driver document not found, creating default...');
+                    // Create default driver info
+                    driverInfo = {
+                        name: currentDriver.displayName || 'Driver',
+                        email: currentDriver.email,
+                        isOnline: false,
+                        status: 'offline',
+                        rating: 4.8,
+                        totalDeliveries: 0,
+                        totalEarnings: 0,
+                        todayEarnings: 0,
+                        todayDeliveries: 0,
+                        weeklyEarnings: 0,
+                        acceptanceRate: 100
+                    };
+                    
+                    await driverRef.set({
+                        ...driverInfo,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        userId: currentDriver.uid
+                    });
+                    
+                    updateDriverUI();
+                }
+                
+            } catch (error) {
+                console.error('Error loading driver info:', error);
+                // Fallback to demo mode if Firebase fails
+                showMessage('dashboard-section', 'Using demo data due to connection issues', 'warning');
+                enableDemoMode();
             }
-            
-            showMessage(messageEl, 'Logging in...', 'info');
-            
-            // Simulate login
-            setTimeout(() => {
-                driverInfo = {
-                    name: 'Test Driver',
-                    email: email,
-                    id: 'test-driver-' + Date.now(),
-                    todayEarnings: 0,
-                    weeklyEarnings: 0,
-                    totalDeliveries: 0,
-                    rating: 4.8,
-                    acceptanceRate: 100,
-                    isOnline: false,
-                    status: 'offline'
-                };
-                
-                currentDriver = {
-                    uid: driverInfo.id,
-                    email: email
-                };
-                
-                localStorage.setItem('mealmoment_driver_user', JSON.stringify(currentDriver));
-                
-                showDashboard();
-                updateDriverUI();
-                showMessage(messageEl, 'Logged in successfully!', 'success');
-            }, 1000);
-        }
-
-        function showRegister() {
-            showMessage('login-message', 'Registration system would open here. For now, use Demo Mode.', 'info');
         }
 
         function logout() {
             if (activeDelivery && confirm('You have an active delivery. Are you sure you want to logout?')) {
-                // Cancel active delivery
                 activeDelivery = null;
             }
             
+            if (demoMode) {
+                // Clear demo data
+                demoMode = false;
+                localStorage.removeItem('mealmoment_driver_demo');
+            }
+            
+            auth.signOut();
             currentDriver = null;
             driverInfo = null;
-            demoMode = false;
             
             localStorage.removeItem('mealmoment_driver_user');
-            localStorage.removeItem('mealmoment_driver_demo');
             
             showLogin();
             showMessage('login-message', 'Logged out successfully', 'info');
+        }
+
+        function showRegister() {
+            showMessage('login-message', 'Registration would open here. Use Demo Mode or Google Sign-in.', 'info');
         }
 
         // ===== UI MANAGEMENT =====
@@ -1012,7 +1199,7 @@
             }
         }
 
-        function toggleOnlineStatus() {
+        async function toggleOnlineStatus() {
             isOnline = !isOnline;
             
             if (driverInfo) {
@@ -1021,6 +1208,19 @@
             }
             
             updateOnlineToggle();
+            
+            if (!demoMode && currentDriver) {
+                // Update in Firebase
+                try {
+                    await db.collection('drivers').doc(currentDriver.uid).update({
+                        isOnline: isOnline,
+                        status: isOnline ? 'available' : 'offline',
+                        lastOnline: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Error updating online status:', error);
+                }
+            }
             
             if (isOnline) {
                 showMessage('dashboard-section', 'You are now online! Looking for deliveries...', 'success');
@@ -1051,7 +1251,7 @@
                 if (demoMode) {
                     loadDemoDeliveries();
                 } else {
-                    loadRealDeliveries();
+                    loadFirebaseDeliveries();
                 }
                 
                 if (loadingEl) loadingEl.classList.add('hidden');
@@ -1103,10 +1303,38 @@
             renderDeliveries();
         }
 
-        function loadRealDeliveries() {
-            // This would connect to Firebase in production
-            availableDeliveries = [];
-            showNoDeliveriesMessage();
+        async function loadFirebaseDeliveries() {
+            try {
+                // This would load from Firebase in production
+                const ordersSnapshot = await db.collection('orders')
+                    .where('status', 'in', ['ready_for_delivery', 'preparing'])
+                    .where('driverId', '==', null)
+                    .limit(10)
+                    .get();
+                
+                availableDeliveries = [];
+                ordersSnapshot.forEach(doc => {
+                    const order = {
+                        id: doc.id,
+                        ...doc.data()
+                    };
+                    availableDeliveries.push(order);
+                });
+                
+                if (availableDeliveries.length === 0) {
+                    // If no real deliveries, show demo data for testing
+                    loadDemoDeliveries();
+                    showMessage('dashboard-section', 'Showing demo deliveries for testing', 'info');
+                } else {
+                    renderDeliveries();
+                }
+                
+            } catch (error) {
+                console.error('Error loading deliveries:', error);
+                // Fallback to demo data
+                loadDemoDeliveries();
+                showMessage('dashboard-section', 'Showing demo data due to connection issues', 'warning');
+            }
         }
 
         function renderDeliveries() {
@@ -1172,38 +1400,8 @@
             `).join('');
         }
 
-        function showNoDeliveriesMessage() {
-            const deliveriesList = document.getElementById('deliveries-list');
-            deliveriesList.innerHTML = `
-                <div style="text-align: center; padding: 3rem 1rem;">
-                    <div style="font-size: 4rem; color: var(--light-gray); margin-bottom: 1rem;">
-                        <i class="fas fa-box-open"></i>
-                    </div>
-                    <h3 style="color: var(--gray); margin-bottom: 0.5rem;">
-                        No deliveries available
-                    </h3>
-                    <p style="color: var(--gray);">
-                        Check back during peak hours (11 AM - 2 PM, 5 PM - 9 PM)
-                    </p>
-                    <button class="btn btn-primary mt-4" onclick="loadAvailableDeliveries()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-            `;
-        }
-
-        function clearDeliveriesList() {
-            const deliveriesList = document.getElementById('deliveries-list');
-            deliveriesList.innerHTML = `
-                <div style="text-align: center; padding: 2rem; color: var(--gray);">
-                    <i class="fas fa-power-off" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p>You are offline. Go online to see available deliveries.</p>
-                </div>
-            `;
-        }
-
         // ===== DELIVERY ACTIONS =====
-        function acceptDelivery(deliveryId, fee) {
+        window.acceptDelivery = async function(deliveryId, fee) {
             if (activeDelivery) {
                 showMessage('dashboard-section', 'You already have an active delivery', 'error');
                 return;
@@ -1225,14 +1423,15 @@
             
             showActiveDelivery();
             showMessage('dashboard-section', `Delivery accepted! +$${fee.toFixed(2)}`, 'success');
-        }
+        };
 
-        function declineDelivery(deliveryId) {
+        window.declineDelivery = function(deliveryId) {
             availableDeliveries = availableDeliveries.filter(d => d.id !== deliveryId);
             renderDeliveries();
             showMessage('dashboard-section', 'Delivery declined', 'info');
-        }
+        };
 
+        // ===== OTHER FUNCTIONS (same as before) =====
         function showActiveDelivery() {
             if (!activeDelivery) return;
             
@@ -1257,9 +1456,7 @@
             activeDelivery.status = 'picked_up';
             updateProgressSteps('picked_up');
             
-            // Enable delivery button
             document.getElementById('delivery-btn').disabled = false;
-            
             showMessage('dashboard-section', 'Order picked up!', 'success');
         }
 
@@ -1269,9 +1466,7 @@
             activeDelivery.status = 'on_the_way';
             updateProgressSteps('on_the_way');
             
-            // Enable complete button
             document.getElementById('complete-btn').disabled = false;
-            
             showMessage('dashboard-section', 'On the way to customer!', 'success');
         }
 
@@ -1280,24 +1475,18 @@
             
             const fee = activeDelivery.fee;
             
-            // Update driver earnings
             if (driverInfo) {
                 driverInfo.todayEarnings += fee;
                 driverInfo.weeklyEarnings += fee;
                 driverInfo.totalDeliveries += 1;
                 updateDriverUI();
                 
-                // Add to earnings history
                 addToEarningsHistory(activeDelivery.orderNumber, fee);
             }
             
-            // Hide active delivery
             document.getElementById('active-delivery-container').classList.add('hidden');
-            
-            // Reset
             activeDelivery = null;
             
-            // Reload deliveries if online
             if (isOnline) {
                 loadAvailableDeliveries();
             }
@@ -1306,13 +1495,11 @@
         }
 
         function updateProgressSteps(status) {
-            // Reset all
             ['step-accepted', 'step-pickup', 'step-delivery', 'step-complete'].forEach(stepId => {
                 const step = document.getElementById(stepId);
                 if (step) step.classList.remove('completed', 'active');
             });
             
-            // Mark accepted as completed
             document.getElementById('step-accepted').classList.add('completed');
             
             if (status === 'accepted') {
@@ -1336,90 +1523,8 @@
             }
         }
 
-        // ===== EARNINGS =====
-        function loadEarningsHistory() {
-            const historyElement = document.getElementById('earnings-history');
-            
-            if (!driverInfo || driverInfo.totalDeliveries === 0) {
-                historyElement.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--gray);">
-                        <i class="fas fa-coins" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                        <p>Complete deliveries to see earnings here</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Demo earnings history
-            const demoEarnings = [
-                { order: 'MM-2098', amount: 6.50, time: 'Today, 12:45 PM' },
-                { order: 'MM-2097', amount: 5.75, time: 'Today, 11:20 AM' },
-                { order: 'MM-2096', amount: 7.25, time: 'Today, 10:15 AM' },
-                { order: 'MM-2095', amount: 4.99, time: 'Yesterday, 8:30 PM' }
-            ];
-            
-            historyElement.innerHTML = demoEarnings.map(earning => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--light-gray);">
-                    <div>
-                        <div style="font-weight: 600;">Order #${earning.order}</div>
-                        <div style="font-size: 0.9rem; color: var(--gray);">${earning.time}</div>
-                    </div>
-                    <div style="color: var(--success); font-weight: 700; font-size: 1.1rem;">
-                        +$${earning.amount.toFixed(2)}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function addToEarningsHistory(orderNumber, amount) {
-            const historyElement = document.getElementById('earnings-history');
-            
-            // Get current date/time
-            const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const dateString = `Today, ${timeString}`;
-            
-            // Create new earning entry
-            const earningEntry = document.createElement('div');
-            earningEntry.style.cssText = `
-                display: flex; 
-                justify-content: space-between; 
-                align-items: center; 
-                padding: 1rem; 
-                border-bottom: 1px solid var(--light-gray);
-            `;
-            earningEntry.innerHTML = `
-                <div>
-                    <div style="font-weight: 600;">Order #${orderNumber}</div>
-                    <div style="font-size: 0.9rem; color: var(--gray);">${dateString}</div>
-                </div>
-                <div style="color: var(--success); font-weight: 700; font-size: 1.1rem;">
-                    +$${amount.toFixed(2)}
-                </div>
-            `;
-            
-            // Insert at the top
-            if (historyElement.firstChild) {
-                historyElement.insertBefore(earningEntry, historyElement.firstChild);
-            } else {
-                historyElement.innerHTML = '';
-                historyElement.appendChild(earningEntry);
-            }
-        }
-
-        function showEarningsDetails() {
-            if (!driverInfo) return;
-            
-            const weekly = driverInfo.weeklyEarnings.toFixed(2);
-            const today = driverInfo.todayEarnings.toFixed(2);
-            const total = driverInfo.totalDeliveries;
-            
-            showMessage('dashboard-section', `Weekly: $${weekly} | Today: $${today} | Total Deliveries: ${total}`, 'info');
-        }
-
         // ===== UTILITY FUNCTIONS =====
         function showMessage(elementId, message, type) {
-            // Create message element
             const messageEl = document.createElement('div');
             messageEl.className = `message ${type}-message`;
             messageEl.innerHTML = `
@@ -1427,12 +1532,10 @@
                 ${message}
             `;
             
-            // Add to page
             const container = document.querySelector('.container');
             if (container) {
                 container.insertBefore(messageEl, container.firstChild);
                 
-                // Remove after 5 seconds
                 setTimeout(() => {
                     if (messageEl.parentNode) {
                         messageEl.parentNode.removeChild(messageEl);
@@ -1474,42 +1577,115 @@
                 const hours = Math.floor(activeMinutes / 60);
                 const minutes = activeMinutes % 60;
                 timerElement.textContent = `${hours}h ${minutes}m`;
-            }, 60000); // Update every minute
+            }, 60000);
         }
 
-        function loadDriverInfo() {
-            // This would load from Firebase in production
-            if (demoMode) {
-                // Already loaded in demo mode
+        function loadEarningsHistory() {
+            const historyElement = document.getElementById('earnings-history');
+            
+            if (!driverInfo || driverInfo.totalDeliveries === 0) {
+                historyElement.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                        <i class="fas fa-coins" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <p>Complete deliveries to see earnings here</p>
+                    </div>
+                `;
                 return;
             }
             
-            // Simulate loading from localStorage
-            const savedInfo = localStorage.getItem('mealmoment_driver_info');
-            if (savedInfo) {
-                driverInfo = JSON.parse(savedInfo);
-            } else {
-                // Default driver info
-                driverInfo = {
-                    name: 'New Driver',
-                    email: currentDriver?.email || 'driver@example.com',
-                    todayEarnings: 0,
-                    weeklyEarnings: 0,
-                    totalDeliveries: 0,
-                    rating: 4.8,
-                    acceptanceRate: 100,
-                    isOnline: false,
-                    status: 'offline'
-                };
-                localStorage.setItem('mealmoment_driver_info', JSON.stringify(driverInfo));
-            }
+            const demoEarnings = [
+                { order: 'MM-2098', amount: 6.50, time: 'Today, 12:45 PM' },
+                { order: 'MM-2097', amount: 5.75, time: 'Today, 11:20 AM' },
+                { order: 'MM-2096', amount: 7.25, time: 'Today, 10:15 AM' },
+                { order: 'MM-2095', amount: 4.99, time: 'Yesterday, 8:30 PM' }
+            ];
             
-            updateDriverUI();
+            historyElement.innerHTML = demoEarnings.map(earning => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--light-gray);">
+                    <div>
+                        <div style="font-weight: 600;">Order #${earning.order}</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">${earning.time}</div>
+                    </div>
+                    <div style="color: var(--success); font-weight: 700; font-size: 1.1rem;">
+                        +$${earning.amount.toFixed(2)}
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // Make functions available globally for onclick handlers
-        window.acceptDelivery = acceptDelivery;
-        window.declineDelivery = declineDelivery;
+        function addToEarningsHistory(orderNumber, amount) {
+            const historyElement = document.getElementById('earnings-history');
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateString = `Today, ${timeString}`;
+            
+            const earningEntry = document.createElement('div');
+            earningEntry.style.cssText = `
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                padding: 1rem; 
+                border-bottom: 1px solid var(--light-gray);
+            `;
+            earningEntry.innerHTML = `
+                <div>
+                    <div style="font-weight: 600;">Order #${orderNumber}</div>
+                    <div style="font-size: 0.9rem; color: var(--gray);">${dateString}</div>
+                </div>
+                <div style="color: var(--success); font-weight: 700; font-size: 1.1rem;">
+                    +$${amount.toFixed(2)}
+                </div>
+            `;
+            
+            if (historyElement.firstChild) {
+                historyElement.insertBefore(earningEntry, historyElement.firstChild);
+            } else {
+                historyElement.innerHTML = '';
+                historyElement.appendChild(earningEntry);
+            }
+        }
+
+        function showEarningsDetails() {
+            if (!driverInfo) return;
+            
+            const weekly = driverInfo.weeklyEarnings.toFixed(2);
+            const today = driverInfo.todayEarnings.toFixed(2);
+            const total = driverInfo.totalDeliveries;
+            
+            showMessage('dashboard-section', `Weekly: $${weekly} | Today: $${today} | Total Deliveries: ${total}`, 'info');
+        }
+
+        function showNoDeliveriesMessage() {
+            const deliveriesList = document.getElementById('deliveries-list');
+            deliveriesList.innerHTML = `
+                <div style="text-align: center; padding: 3rem 1rem;">
+                    <div style="font-size: 4rem; color: var(--light-gray); margin-bottom: 1rem;">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <h3 style="color: var(--gray); margin-bottom: 0.5rem;">
+                        No deliveries available
+                    </h3>
+                    <p style="color: var(--gray);">
+                        Check back during peak hours (11 AM - 2 PM, 5 PM - 9 PM)
+                    </p>
+                    <button class="btn btn-primary mt-4" onclick="loadAvailableDeliveries()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            `;
+        }
+
+        function clearDeliveriesList() {
+            const deliveriesList = document.getElementById('deliveries-list');
+            deliveriesList.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                    <i class="fas fa-power-off" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>You are offline. Go online to see available deliveries.</p>
+                </div>
+            `;
+        }
+
         window.loadAvailableDeliveries = loadAvailableDeliveries;
     </script>
 </body>
