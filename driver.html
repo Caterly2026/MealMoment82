@@ -1,12 +1,1011 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- All your existing CSS and meta tags remain the same -->
-    <!-- ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMoment Driver - Food Delivery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        /* CSS Styles - Same as before */
+        :root {
+            --driver-orange: #FF6A00;
+            --driver-green: #2E7D32;
+            --driver-blue: #2196F3;
+            --driver-charcoal: #1F1F1F;
+            --driver-gray-200: #EAEAEA;
+            --driver-bg: #FFFFFF;
+            --driver-bg-soft: #F8FAFC;
+            --driver-gradient: linear-gradient(90deg, #FF6A00 0%, #2196F3 100%);
+            --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;
+            --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--driver-bg);
+            color: var(--driver-charcoal);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        .driver-header {
+            background: var(--driver-gradient);
+            color: white;
+            padding: var(--space-md) 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            text-decoration: none;
+            color: white;
+        }
+
+        .logo-image {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+        }
+
+        .logo-text {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .logo-subtitle {
+            font-size: 0.7rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .driver-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .status-toggle {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,255,255,0.3);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--driver-green);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .status-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .main-content {
+            padding: var(--space-lg) 0;
+            min-height: calc(100vh - 70px);
+        }
+
+        .login-section {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: var(--space-lg) 0;
+        }
+
+        .login-card {
+            background: var(--driver-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .login-logo {
+            height: 100px;
+            width: auto;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            object-fit: contain;
+        }
+
+        .login-title {
+            color: var(--driver-orange);
+            margin-top: 15px;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .login-subtitle {
+            color: var(--driver-charcoal);
+            font-size: 1rem;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .dashboard-section {
+            display: none;
+        }
+
+        .earnings-summary {
+            background: var(--driver-gradient);
+            color: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .today-earnings {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .stat-card {
+            background: var(--driver-bg);
+            border: 2px solid var(--driver-gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--driver-orange);
+            margin-bottom: var(--space-xs);
+        }
+
+        .stat-label {
+            color: var(--driver-charcoal);
+            font-size: 0.9rem;
+        }
+
+        .deliveries-section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: var(--driver-blue);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .deliveries-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        .delivery-card {
+            background: var(--driver-bg);
+            border: 2px solid var(--driver-gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .delivery-card.high-priority {
+            border-color: var(--driver-orange);
+            background: linear-gradient(135deg, rgba(255, 106, 0, 0.05) 0%, rgba(255, 106, 0, 0.1) 100%);
+        }
+
+        .delivery-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--driver-orange);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-sm);
+        }
+
+        .delivery-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--driver-green);
+        }
+
+        .delivery-distance {
+            color: var(--driver-charcoal);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .locations {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: var(--space-sm);
+            align-items: center;
+            margin: var(--space-md) 0;
+            padding: var(--space-md);
+            background: var(--driver-bg-soft);
+            border-radius: var(--radius-md);
+        }
+
+        .location {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+        }
+
+        .location-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: var(--space-xs);
+        }
+
+        .pickup-icon {
+            background: var(--driver-orange);
+            color: white;
+        }
+
+        .dropoff-icon {
+            background: var(--driver-green);
+            color: white;
+        }
+
+        .arrow {
+            font-size: 1.5rem;
+            color: var(--driver-charcoal);
+            text-align: center;
+        }
+
+        .location-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .location-address {
+            color: var(--driver-charcoal);
+            font-size: 0.85rem;
+        }
+
+        .delivery-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: var(--space-md);
+            padding-top: var(--space-md);
+            border-top: 1px solid var(--driver-gray-200);
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--driver-charcoal);
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--driver-charcoal);
+        }
+
+        .delivery-actions {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+            padding: 1rem 1.75rem;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            width: 100%;
+            min-height: 50px;
+        }
+
+        .btn-accept {
+            background: var(--driver-green);
+            color: white;
+        }
+
+        .btn-decline {
+            background: var(--driver-bg);
+            color: var(--driver-charcoal);
+            border: 2px solid var(--driver-gray-200);
+        }
+
+        .btn-nav {
+            background: var(--driver-blue);
+            color: white;
+        }
+
+        .btn-complete {
+            background: var(--driver-green);
+            color: white;
+        }
+
+        .active-delivery-section {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(255, 106, 0, 0.1) 100%);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            border: 2px solid var(--driver-blue);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: var(--space-lg) 0;
+            position: relative;
+        }
+
+        .progress-steps:before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background: var(--driver-gray-200);
+            z-index: 1;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--driver-gray-200);
+            color: var(--driver-charcoal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+        }
+
+        .step.active .step-icon {
+            background: var(--driver-green);
+            color: white;
+        }
+
+        .step.completed .step-icon {
+            background: var(--driver-green);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            text-align: center;
+            color: var(--driver-charcoal);
+        }
+
+        .step.active .step-label {
+            color: var(--driver-green);
+            font-weight: 600;
+        }
+
+        .earnings-history {
+            background: var(--driver-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-top: var(--space-lg);
+            border: 2px solid var(--driver-gray-200);
+        }
+
+        .earning-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-sm) 0;
+            border-bottom: 1px solid var(--driver-gray-200);
+        }
+
+        .earning-amount {
+            font-weight: 700;
+            color: var(--driver-green);
+        }
+
+        input, select {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--driver-gray-200);
+            border-radius: var(--radius-md);
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--driver-blue);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .message {
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            margin: var(--space-md) 0;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+        }
+
+        .success-message {
+            background: rgba(46, 125, 50, 0.1);
+            color: var(--driver-green);
+            border: 1px solid rgba(46, 125, 50, 0.2);
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .info-message {
+            background: rgba(33, 150, 243, 0.1);
+            color: var(--driver-blue);
+            border: 1px solid rgba(33, 150, 243, 0.2);
+        }
+
+        .warning-message {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-1 { margin-bottom: var(--space-xs); }
+        .mb-2 { margin-bottom: var(--space-sm); }
+        .mb-3 { margin-bottom: var(--space-md); }
+        .mb-4 { margin-bottom: var(--space-lg); }
+
+        .google-signin-btn {
+            background: white;
+            color: #757575;
+            border: 2px solid #ddd;
+            border-radius: var(--radius-md);
+            padding: 1rem 1.75rem;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            min-height: 50px;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: var(--space-xl);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--driver-gray-200);
+            border-top: 4px solid var(--driver-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 0 var(--space-sm); }
+            .locations { grid-template-columns: 1fr; }
+            .arrow { display: none; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .delivery-actions { flex-direction: column; }
+            .delivery-header { flex-direction: column; gap: var(--space-sm); }
+            .login-card { padding: var(--space-lg); }
+        }
+    </style>
 </head>
 <body>
-    <!-- Your existing HTML structure remains the same -->
-    <!-- ... -->
+    <!-- Header -->
+    <header class="driver-header">
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">
+                    <img src="MealMomentDriverlogo.jpeg" alt="MealMoment Driver" class="logo-image" onerror="this.src='https://via.placeholder.com/45x45/FF6A00/ffffff?text=MM'">
+                    <div class="logo-text">
+                        MealMoment Driver
+                        <span class="logo-subtitle">Food Delivery</span>
+                    </div>
+                </a>
+                <div class="driver-status hidden" id="driver-status">
+                    <div class="status-toggle">
+                        <span class="status-label" id="status-text">Offline</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="online-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <button class="btn btn-nav" id="earnings-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; min-height: 40px;">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span id="today-earnings">$0.00</span>
+                    </button>
+                    <button class="btn btn-decline" id="logout-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; min-height: 40px;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Login Section -->
+        <section id="login-section" class="login-section">
+            <div class="login-card">
+                <div class="login-header">
+                    <img src="MealMomentDriverlogo.jpeg" alt="MealMoment Driver" class="login-logo" onerror="this.src='https://via.placeholder.com/100x100/FF6A00/ffffff?text=MM'">
+                    <h1 class="login-title">
+                        Driver Login
+                    </h1>
+                    <p class="login-subtitle">
+                        Sign in to start delivering meals with MealMoment
+                    </p>
+                </div>
+                
+                <button id="google-signin-btn" class="google-signin-btn">
+                    <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                        <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+                            <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
+                            <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
+                            <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
+                            <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
+                        </g>
+                    </svg>
+                    Sign in with Google
+                </button>
+
+                <div class="divider" style="display: flex; align-items: center; text-align: center; margin: var(--space-lg) 0; color: var(--driver-charcoal);">
+                    <span style="flex: 1; border-bottom: 1px solid var(--driver-gray-200);"></span>
+                    <span style="padding: 0 var(--space-sm); font-size: 0.9rem;">OR</span>
+                    <span style="flex: 1; border-bottom: 1px solid var(--driver-gray-200);"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="driver-email" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="driver-email" placeholder="driver@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="driver-password" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" id="driver-password" placeholder="Enter your password">
+                </div>
+
+                <div id="login-message" class="message hidden"></div>
+
+                <button class="btn btn-accept mb-2" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+                
+                <button class="btn btn-decline" id="show-register-btn">
+                    <i class="fas fa-user-plus"></i> Create Driver Account
+                </button>
+
+                <div style="margin-top: var(--space-lg); text-align: center; font-size: 0.85rem; color: var(--driver-charcoal);">
+                    <p>Don't have a driver account? Contact us at <strong>drivers@mealmoment.com</strong></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Register Section -->
+        <section id="register-section" class="login-section hidden">
+            <div class="login-card">
+                <div class="login-header">
+                    <img src="MealMomentDriverlogo.jpeg" alt="MealMoment Driver" class="login-logo" onerror="this.src='https://via.placeholder.com/100x100/FF6A00/ffffff?text=MM'">
+                    <h1 class="login-title">
+                        Driver Registration
+                    </h1>
+                    <p class="login-subtitle">
+                        Sign up to become a MealMoment delivery driver
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-name" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
+                        <i class="fas fa-user"></i> Full Name *
+                    </label>
+                    <input type="text" id="register-name" placeholder="John Doe" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-email" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
+                        <i class="fas fa-envelope"></i> Email *
+                    </label>
+                    <input type="email" id="register-email" placeholder="driver@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-phone" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
+                        <i class="fas fa-phone"></i> Phone Number *
+                    </label>
+                    <input type="tel" id="register-phone" placeholder="(123) 456-7890" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-vehicle" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
+                        <i class="fas fa-car"></i> Vehicle Type *
+                    </label>
+                    <select id="register-vehicle" required>
+                        <option value="">Select Vehicle</option>
+                        <option value="car">Car</option>
+                        <option value="motorcycle">Motorcycle</option>
+                        <option value="bicycle">Bicycle</option>
+                        <option value="scooter">Scooter</option>
+                        <option value="walking">Walking</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-zip" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
+                        <i class="fas fa-map-marker-alt"></i> Service Area (ZIP Code) *
+                    </label>
+                    <input type="text" id="register-zip" placeholder="e.g., 90001" required maxlength="5">
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
+                        <i class="fas fa-lock"></i> Password *
+                    </label>
+                    <input type="password" id="register-password" placeholder="Minimum 6 characters" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-confirm" style="display: block; margin-bottom: var(--space-xs); color: var(--driver-charcoal); font-weight: 500;">
+                        <i class="fas fa-lock"></i> Confirm Password *
+                    </label>
+                    <input type="password" id="register-confirm" placeholder="Confirm your password" required>
+                </div>
+
+                <div id="register-message" class="message hidden"></div>
+
+                <button class="btn btn-accept mb-2" id="register-btn">
+                    <i class="fas fa-check-circle"></i> Create Account
+                </button>
+                
+                <button class="btn btn-decline" id="show-login-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Login
+                </button>
+
+                <div style="margin-top: var(--space-lg); text-align: center; font-size: 0.85rem; color: var(--driver-charcoal);">
+                    <p>By creating an account, you agree to our <a href="#" style="color: var(--driver-blue);">Driver Terms</a> and <a href="#" style="color: var(--driver-blue);">Privacy Policy</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="dashboard-section">
+            <!-- Earnings Summary -->
+            <div class="earnings-summary">
+                <h2 style="color: white; margin-bottom: var(--space-sm);">Today's Earnings</h2>
+                <div class="today-earnings" id="today-earnings-amount">$0.00</div>
+                <div style="display: flex; justify-content: space-between; color: rgba(255, 255, 255, 0.9);">
+                    <span>Completed: <span id="today-deliveries">0</span> deliveries</span>
+                    <span>Active time: <span id="active-time">0h 0m</span></span>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="weekly-earnings">$0.00</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-deliveries">0</div>
+                    <div class="stat-label">Total Deliveries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="rating">4.8</div>
+                    <div class="stat-label">Rating</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="acceptance-rate">100%</div>
+                    <div class="stat-label">Acceptance Rate</div>
+                </div>
+            </div>
+
+            <!-- Active Delivery Section -->
+            <div id="active-delivery-container" class="hidden">
+                <div class="active-delivery-section">
+                    <div class="section-header">
+                        <h2 style="color: var(--driver-blue);">
+                            <i class="fas fa-box"></i> Active Delivery
+                        </h2>
+                        <div style="color: var(--driver-green); font-weight: 600; font-size: 1.2rem;">
+                            +$<span id="active-delivery-pay">0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Steps -->
+                    <div class="progress-steps">
+                        <div class="step completed" id="step-accepted">
+                            <div class="step-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="step-label">Accepted</div>
+                        </div>
+                        <div class="step" id="step-pickup">
+                            <div class="step-icon">2</div>
+                            <div class="step-label">Pick Up</div>
+                        </div>
+                        <div class="step" id="step-delivery">
+                            <div class="step-icon">3</div>
+                            <div class="step-label">Delivery</div>
+                        </div>
+                        <div class="step" id="step-complete">
+                            <div class="step-icon">4</div>
+                            <div class="step-label">Complete</div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Details -->
+                    <div class="locations">
+                        <div class="location">
+                            <div class="location-icon pickup-icon">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div class="location-name" id="pickup-name">Restaurant Name</div>
+                            <div class="location-address" id="pickup-address">123 Restaurant St</div>
+                        </div>
+                        
+                        <div class="arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+
+                        <div class="location">
+                            <div class="location-icon dropoff-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="location-name" id="dropoff-name">Customer Name</div>
+                            <div class="location-address" id="dropoff-address">456 Customer Ave</div>
+                        </div>
+                    </div>
+
+                    <!-- Order Details -->
+                    <div class="delivery-details">
+                        <div class="detail-item">
+                            <div class="detail-value" id="order-number">MM-0001</div>
+                            <div class="detail-label">Order #</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value" id="delivery-time">30 min</div>
+                            <div class="detail-label">Est. Time</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value" id="delivery-distance">2.5 mi</div>
+                            <div class="detail-label">Distance</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="delivery-actions">
+                        <button class="btn btn-nav" id="pickup-btn">
+                            <i class="fas fa-store"></i> Arrived at Restaurant
+                        </button>
+                        <button class="btn btn-nav" id="delivery-btn" disabled>
+                            <i class="fas fa-road"></i> Start Delivery
+                        </button>
+                        <button class="btn btn-complete" id="complete-btn" disabled>
+                            <i class="fas fa-check-circle"></i> Complete Delivery
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Available Deliveries Section -->
+            <div class="deliveries-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-bolt"></i> Available Deliveries
+                    </h2>
+                    <button class="refresh-btn" id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+
+                <div id="deliveries-list" class="deliveries-list">
+                    <!-- Deliveries will be loaded here -->
+                    <div class="loading-spinner" id="deliveries-loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earnings History -->
+            <div class="earnings-history">
+                <h2 style="margin-bottom: var(--space-md);">
+                    <i class="fas fa-history"></i> Recent Earnings
+                </h2>
+                <div id="earnings-history-list">
+                    <div class="earning-item">
+                        <div>
+                            <div style="font-weight: 600;">No earnings yet</div>
+                            <div style="font-size: 0.8rem; color: var(--driver-charcoal);">Complete your first delivery</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <script>
         // ===== FIREBASE CONFIGURATION =====
@@ -32,32 +1031,55 @@
         let activeDelivery = null;
         let availableDeliveries = [];
 
-        // ===== 1. INITIALIZATION =====
+        // ===== INITIALIZE APP =====
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing app...');
+            initDriverApp();
+            setupEventListeners();
+        });
+
         function initDriverApp() {
-            console.log("Initializing Driver App...");
+            console.log('Initializing Firebase app...');
             
             // Check authentication state
             auth.onAuthStateChanged(async (user) => {
-                console.log("Auth state changed:", user ? "User logged in" : "No user");
+                console.log('Auth state changed:', user ? 'User logged in' : 'No user');
                 if (user) {
                     currentDriver = user;
-                    console.log("Loading driver info for:", user.uid);
+                    console.log('Loading driver info for:', user.uid);
                     await loadDriverInfo();
                     showDashboard();
-                    setupRealTimeListeners();
                 } else {
-                    console.log("No user, showing login");
+                    console.log('No user, showing login');
                     currentDriver = null;
                     showLogin();
                 }
             });
-
-            // Update time display
-            updateActiveTime();
-            setInterval(updateActiveTime, 60000);
         }
 
-        // ===== 2. AUTHENTICATION FUNCTIONS =====
+        function setupEventListeners() {
+            // Login buttons
+            document.getElementById('google-signin-btn').addEventListener('click', signInWithGoogle);
+            document.getElementById('login-btn').addEventListener('click', loginDriver);
+            document.getElementById('show-register-btn').addEventListener('click', showRegisterForm);
+            
+            // Register buttons
+            document.getElementById('register-btn').addEventListener('click', registerDriver);
+            document.getElementById('show-login-btn').addEventListener('click', showLoginForm);
+            
+            // Dashboard buttons
+            document.getElementById('online-toggle').addEventListener('change', toggleOnlineStatus);
+            document.getElementById('earnings-btn').addEventListener('click', showEarnings);
+            document.getElementById('logout-btn').addEventListener('click', logoutDriver);
+            document.getElementById('refresh-btn').addEventListener('click', loadAvailableDeliveries);
+            
+            // Delivery buttons
+            document.getElementById('pickup-btn').addEventListener('click', startPickup);
+            document.getElementById('delivery-btn').addEventListener('click', startDelivery);
+            document.getElementById('complete-btn').addEventListener('click', completeDelivery);
+        }
+
+        // ===== AUTHENTICATION FUNCTIONS =====
         function showLoginForm() {
             document.getElementById('login-section').classList.remove('hidden');
             document.getElementById('register-section').classList.add('hidden');
@@ -85,14 +1107,14 @@
                 const result = await auth.signInWithPopup(provider);
                 currentDriver = result.user;
                 
-                console.log("Google sign in successful, checking driver info...");
+                console.log('Google sign in successful:', currentDriver.uid);
                 
                 // Check if driver info exists
-                const driverDoc = await db.collection('drivers').doc(currentDriver.uid).get();
+                const driverRef = db.collection('drivers').doc(currentDriver.uid);
+                const driverDoc = await driverRef.get();
                 
                 if (!driverDoc.exists) {
-                    console.log("Creating new driver profile for Google user");
-                    // Create driver info for new Google user
+                    console.log('Creating new driver profile');
                     const driverData = {
                         name: result.user.displayName || 'Driver',
                         email: result.user.email,
@@ -113,26 +1135,23 @@
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                     };
                     
-                    await db.collection('drivers').doc(currentDriver.uid).set(driverData);
+                    await driverRef.set(driverData);
                     driverInfo = driverData;
-                    console.log("New driver profile created");
                 } else {
                     driverInfo = driverDoc.data();
-                    // Update last login
-                    await db.collection('drivers').doc(currentDriver.uid).update({
+                    await driverRef.update({
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    console.log("Existing driver profile loaded");
                 }
                 
                 showDashboard();
                 await loadDriverInfo();
-                setupRealTimeListeners();
                 
-                showMessage(messageEl, 'Signed in with Google successfully!', 'success');
+                showMessage(messageEl, 'Signed in successfully!', 'success');
+                
             } catch (error) {
                 console.error('Google sign in error:', error);
-                showMessage('login-message', 'Error signing in with Google: ' + error.message, 'error');
+                showMessage('login-message', 'Error signing in: ' + error.message, 'error');
             }
         }
 
@@ -151,12 +1170,12 @@
             try {
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 currentDriver = userCredential.user;
-                console.log("Email login successful for:", currentDriver.uid);
+                console.log('Email login successful:', currentDriver.uid);
                 
                 await loadDriverInfo();
                 showDashboard();
-                setupRealTimeListeners();
                 showMessage(messageEl, 'Logged in successfully!', 'success');
+                
             } catch (error) {
                 console.error('Login error:', error);
                 showMessage(messageEl, error.message, 'error');
@@ -220,7 +1239,7 @@
                 // Create user account
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 currentDriver = userCredential.user;
-                console.log("Account created for:", currentDriver.uid);
+                console.log('Account created:', currentDriver.uid);
                 
                 // Create driver info
                 const driverData = {
@@ -245,13 +1264,12 @@
                 
                 await db.collection('drivers').doc(currentDriver.uid).set(driverData);
                 driverInfo = driverData;
-                console.log("Driver profile created in Firestore");
                 
                 showDashboard();
                 await loadDriverInfo();
-                setupRealTimeListeners();
                 
                 showMessage(messageEl, 'Account created successfully!', 'success');
+                
             } catch (error) {
                 console.error('Registration error:', error);
                 showMessage(messageEl, error.message, 'error');
@@ -265,70 +1283,38 @@
                 }
             }
             
-            // Set offline before logging out
             if (isOnline) {
                 toggleOnlineStatus();
             }
             
-            auth.signOut()
-                .then(() => {
-                    currentDriver = null;
-                    driverInfo = null;
-                    activeDelivery = null;
-                    showLogin();
-                })
-                .catch((error) => {
-                    console.error('Logout error:', error);
-                });
+            auth.signOut();
         }
 
-        // ===== 3. DRIVER INFO FUNCTIONS =====
+        // ===== DRIVER INFO FUNCTIONS =====
         async function loadDriverInfo() {
-            if (!currentDriver) {
-                console.log("No current driver, cannot load info");
-                return;
-            }
+            if (!currentDriver) return;
 
             try {
-                console.log("Loading driver info for:", currentDriver.uid);
                 const doc = await db.collection('drivers').doc(currentDriver.uid).get();
                 
                 if (doc.exists) {
                     driverInfo = doc.data();
-                    console.log("Driver info loaded:", driverInfo);
+                    console.log('Driver info loaded:', driverInfo);
                     
-                    // Update UI
                     updateDriverUI();
                     
-                    // Update online status
                     isOnline = driverInfo.isOnline || false;
                     updateOnlineToggle();
                     
-                    // Load stats
                     await loadDriverStats();
                     
-                    // Load available deliveries if online
                     if (isOnline) {
-                        console.log("Driver is online, loading deliveries");
                         await loadAvailableDeliveries();
                     }
                     
-                    // Check for active delivery
                     await checkActiveDelivery();
                 } else {
-                    console.error("Driver document does not exist in Firestore");
-                    // Create basic driver info if missing
-                    const basicDriverData = {
-                        name: currentDriver.displayName || 'Driver',
-                        email: currentDriver.email,
-                        isOnline: false,
-                        status: 'offline',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    
-                    await db.collection('drivers').doc(currentDriver.uid).set(basicDriverData, { merge: true });
-                    driverInfo = basicDriverData;
-                    updateDriverUI();
+                    console.error('Driver document not found');
                 }
             } catch (error) {
                 console.error('Error loading driver info:', error);
@@ -339,12 +1325,10 @@
         function updateDriverUI() {
             if (!driverInfo) return;
 
-            // Update header earnings
             const todayEarnings = driverInfo.todayEarnings || 0;
             document.getElementById('today-earnings').textContent = `$${todayEarnings.toFixed(2)}`;
             document.getElementById('today-earnings-amount').textContent = `$${todayEarnings.toFixed(2)}`;
             
-            // Update stats
             document.getElementById('today-deliveries').textContent = driverInfo.todayDeliveries || 0;
             document.getElementById('weekly-earnings').textContent = `$${(driverInfo.weeklyEarnings || 0).toFixed(2)}`;
             document.getElementById('total-deliveries').textContent = driverInfo.totalDeliveries || 0;
@@ -356,7 +1340,6 @@
             if (!currentDriver) return;
 
             try {
-                // Calculate weekly earnings (last 7 days)
                 const sevenDaysAgo = new Date();
                 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
                 
@@ -371,21 +1354,19 @@
                     weeklyTotal += data.amount || 0;
                 });
                 
-                // Update driver info
                 await db.collection('drivers').doc(currentDriver.uid).update({
                     weeklyEarnings: weeklyTotal
                 });
                 
                 driverInfo.weeklyEarnings = weeklyTotal;
-                
-                // Update UI
                 updateDriverUI();
+                
             } catch (error) {
                 console.error('Error loading driver stats:', error);
             }
         }
 
-        // ===== 4. ONLINE/OFFLINE STATUS =====
+        // ===== ONLINE/OFFLINE STATUS =====
         function updateOnlineToggle() {
             const toggle = document.getElementById('online-toggle');
             const statusText = document.getElementById('status-text');
@@ -404,7 +1385,7 @@
             }
 
             const newStatus = !isOnline;
-            console.log("Toggling online status to:", newStatus);
+            console.log('Toggling online status to:', newStatus);
             
             try {
                 await db.collection('drivers').doc(currentDriver.uid).update({
@@ -420,17 +1401,11 @@
                 updateOnlineToggle();
                 
                 if (newStatus) {
-                    // Go online
-                    showMessage('dashboard-message', 'You are now online! Looking for deliveries...', 'success');
+                    showMessage('dashboard-message', 'You are now online!', 'success');
                     await loadAvailableDeliveries();
-                    startActiveTimeTracking();
                 } else {
-                    // Go offline
                     showMessage('dashboard-message', 'You are now offline', 'info');
                     clearAvailableDeliveries();
-                    stopActiveTimeTracking();
-                    
-                    // If there's an active delivery, cancel it
                     if (activeDelivery) {
                         await cancelActiveDelivery();
                     }
@@ -438,18 +1413,18 @@
                 
             } catch (error) {
                 console.error('Error updating online status:', error);
-                showMessage('dashboard-message', 'Error updating status: ' + error.message, 'error');
+                showMessage('dashboard-message', 'Error: ' + error.message, 'error');
             }
         }
 
-        // ===== 5. DELIVERY MANAGEMENT =====
+        // ===== DELIVERY MANAGEMENT =====
         async function loadAvailableDeliveries() {
             if (!currentDriver || !isOnline) {
                 showMessage('dashboard-message', 'You must be online to see deliveries', 'warning');
                 return;
             }
 
-            console.log("Loading available deliveries...");
+            console.log('Loading available deliveries...');
             const deliveriesList = document.getElementById('deliveries-list');
             const loadingSpinner = document.getElementById('deliveries-loading');
             
@@ -460,18 +1435,14 @@
             }
 
             try {
-                // Get driver's ZIP code
-                const driverZip = driverInfo.zipCode || '90001';
-                
                 // Get orders that need delivery
                 const ordersSnapshot = await db.collection('orders')
                     .where('status', 'in', ['ready_for_delivery', 'preparing'])
                     .where('driverId', '==', null)
-                    .orderBy('createdAt', 'asc')
                     .limit(10)
                     .get();
                 
-                console.log("Found", ordersSnapshot.size, "orders needing delivery");
+                console.log('Found', ordersSnapshot.size, 'orders');
                 
                 availableDeliveries = [];
                 ordersSnapshot.forEach(doc => {
@@ -479,32 +1450,16 @@
                         id: doc.id,
                         ...doc.data()
                     };
-                    
-                    // Check if order is in driver's ZIP code area
-                    if (isOrderInDriverArea(order, driverZip)) {
-                        availableDeliveries.push(order);
-                    }
+                    availableDeliveries.push(order);
                 });
 
-                console.log("Filtered to", availableDeliveries.length, "available deliveries");
                 renderAvailableDeliveries();
                 
             } catch (error) {
-                console.error('Error loading available deliveries:', error);
-                showMessage('dashboard-message', 'Error loading deliveries: ' + error.message, 'error');
-                
-                // Show demo deliveries for testing
-                if (error.code === 'failed-precondition') {
-                    showMessage('dashboard-message', 'Firestore needs indexes. Using demo data for now.', 'warning');
-                }
+                console.error('Error loading deliveries:', error);
+                showMessage('dashboard-message', 'Error loading deliveries', 'error');
                 showDemoDeliveries();
             }
-        }
-
-        function isOrderInDriverArea(order, driverZip) {
-            // Simple ZIP code matching for demo
-            // In production, implement proper geolocation
-            return true;
         }
 
         function renderAvailableDeliveries() {
@@ -602,227 +1557,6 @@
             }).join('');
         }
 
-        function calculateDeliveryFee(order) {
-            // Base fee + distance fee + order value percentage
-            const baseFee = 2.99;
-            const distance = calculateDistance(order);
-            const distanceFee = distance * 0.50;
-            const orderValue = order.total || 15;
-            const orderValueFee = orderValue * 0.10;
-            
-            const totalFee = baseFee + distanceFee + orderValueFee;
-            return Math.min(totalFee, 15);
-        }
-
-        function calculateDistance(order) {
-            return (Math.random() * 4.5 + 0.5).toFixed(1);
-        }
-
-        function estimatePrepTime(order) {
-            return 15 + (order.items ? order.items.length * 2 : 0);
-        }
-
-        function getRestaurantName(order) {
-            return order.restaurantName || 'Local Restaurant';
-        }
-
-        function getRestaurantAddress(order) {
-            return order.restaurantAddress || '123 Restaurant St';
-        }
-
-        async function acceptDelivery(orderId, deliveryFee) {
-            if (!currentDriver || !isOnline) {
-                showMessage('dashboard-message', 'You must be online to accept deliveries', 'error');
-                return;
-            }
-
-            if (activeDelivery) {
-                showMessage('dashboard-message', 'You already have an active delivery', 'error');
-                return;
-            }
-
-            console.log("Accepting delivery:", orderId);
-            
-            try {
-                // Update order with driver info
-                await db.collection('orders').doc(orderId).update({
-                    driverId: currentDriver.uid,
-                    driverName: driverInfo.name,
-                    status: 'accepted',
-                    acceptedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    deliveryFee: deliveryFee
-                });
-
-                // Set as active delivery
-                activeDelivery = {
-                    id: orderId,
-                    fee: deliveryFee,
-                    status: 'accepted'
-                };
-
-                // Update driver status
-                await db.collection('drivers').doc(currentDriver.uid).update({
-                    status: 'on_delivery',
-                    currentOrderId: orderId
-                });
-
-                // Remove from available deliveries
-                availableDeliveries = availableDeliveries.filter(d => d.id !== orderId);
-                renderAvailableDeliveries();
-
-                // Show active delivery section
-                showActiveDelivery(orderId);
-
-                showMessage('dashboard-message', 'Delivery accepted successfully!', 'success');
-
-            } catch (error) {
-                console.error('Error accepting delivery:', error);
-                showMessage('dashboard-message', 'Error accepting delivery: ' + error.message, 'error');
-            }
-        }
-
-        // ===== 6. ACTIVE DELIVERY FUNCTIONS =====
-        async function checkActiveDelivery() {
-            if (!currentDriver) return;
-
-            try {
-                const activeOrders = await db.collection('orders')
-                    .where('driverId', '==', currentDriver.uid)
-                    .where('status', 'in', ['accepted', 'picked_up', 'on_the_way'])
-                    .limit(1)
-                    .get();
-                
-                if (!activeOrders.empty) {
-                    const orderDoc = activeOrders.docs[0];
-                    activeDelivery = {
-                        id: orderDoc.id,
-                        ...orderDoc.data()
-                    };
-                    console.log("Found active delivery:", activeDelivery);
-                    showActiveDelivery(orderDoc.id);
-                }
-            } catch (error) {
-                console.error('Error checking active delivery:', error);
-            }
-        }
-
-        async function showActiveDelivery(orderId) {
-            try {
-                const orderDoc = await db.collection('orders').doc(orderId).get();
-                if (!orderDoc.exists) {
-                    console.error('Order not found:', orderId);
-                    return;
-                }
-
-                const order = orderDoc.data();
-                activeDelivery = { id: orderId, ...order };
-
-                // Update UI elements
-                document.getElementById('active-delivery-container').classList.remove('hidden');
-                document.getElementById('active-delivery-pay').textContent = (order.deliveryFee || calculateDeliveryFee(order)).toFixed(2);
-                
-                document.getElementById('pickup-name').textContent = getRestaurantName(order);
-                document.getElementById('pickup-address').textContent = getRestaurantAddress(order);
-                document.getElementById('dropoff-name').textContent = order.customerName || 'Customer';
-                document.getElementById('dropoff-address').textContent = order.deliveryAddress || 'Address not provided';
-                
-                document.getElementById('order-number').textContent = order.orderNumber || orderId.substring(0, 8);
-                document.getElementById('delivery-time').textContent = estimatePrepTime(order) + ' min';
-                document.getElementById('delivery-distance').textContent = calculateDistance(order) + ' mi';
-                
-                updateProgressSteps(order.status || 'accepted');
-                
-            } catch (error) {
-                console.error('Error showing active delivery:', error);
-            }
-        }
-
-        async function completeDelivery() {
-            if (!activeDelivery) return;
-
-            console.log("Completing delivery:", activeDelivery.id);
-            
-            try {
-                const deliveryFee = activeDelivery.deliveryFee || calculateDeliveryFee(activeDelivery);
-                
-                // Update order status
-                await db.collection('orders').doc(activeDelivery.id).update({
-                    status: 'delivered',
-                    deliveredAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                // Record driver earnings
-                const earningData = {
-                    driverId: currentDriver.uid,
-                    driverName: driverInfo.name,
-                    orderId: activeDelivery.id,
-                    orderNumber: activeDelivery.orderNumber || activeDelivery.id.substring(0, 8),
-                    amount: deliveryFee,
-                    date: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                await db.collection('driverEarnings').add(earningData);
-                
-                // Update driver stats
-                await updateDriverEarnings(deliveryFee);
-                
-                // Update driver status
-                await db.collection('drivers').doc(currentDriver.uid).update({
-                    status: 'available',
-                    currentOrderId: null
-                });
-
-                // Reset active delivery
-                activeDelivery = null;
-                
-                // Hide active delivery section
-                document.getElementById('active-delivery-container').classList.add('hidden');
-                
-                // Update stats
-                await loadDriverStats();
-                
-                // Load new deliveries
-                await loadAvailableDeliveries();
-                
-                showMessage('dashboard-message', `Delivery completed! +$${deliveryFee.toFixed(2)} earned`, 'success');
-                
-                // Add to earnings history
-                addToEarningsHistory(earningData);
-                
-            } catch (error) {
-                console.error('Error completing delivery:', error);
-                showMessage('dashboard-message', 'Error completing delivery: ' + error.message, 'error');
-            }
-        }
-
-        // ===== 7. EARNINGS MANAGEMENT =====
-        async function updateDriverEarnings(amount) {
-            if (!currentDriver) return;
-
-            try {
-                const updateData = {
-                    totalEarnings: firebase.firestore.FieldValue.increment(amount),
-                    todayEarnings: firebase.firestore.FieldValue.increment(amount),
-                    totalDeliveries: firebase.firestore.FieldValue.increment(1),
-                    todayDeliveries: firebase.firestore.FieldValue.increment(1)
-                };
-
-                await db.collection('drivers').doc(currentDriver.uid).update(updateData);
-                
-                // Update local driver info
-                driverInfo.totalEarnings = (driverInfo.totalEarnings || 0) + amount;
-                driverInfo.todayEarnings = (driverInfo.todayEarnings || 0) + amount;
-                driverInfo.totalDeliveries = (driverInfo.totalDeliveries || 0) + 1;
-                driverInfo.todayDeliveries = (driverInfo.todayDeliveries || 0) + 1;
-                
-                updateDriverUI();
-                
-            } catch (error) {
-                console.error('Error updating driver earnings:', error);
-            }
-        }
-
-        // ===== 8. HELPER FUNCTIONS =====
         function showDemoDeliveries() {
             const deliveriesList = document.getElementById('deliveries-list');
             if (!deliveriesList) return;
@@ -850,6 +1584,274 @@
             renderAvailableDeliveries();
         }
 
+        function calculateDeliveryFee(order) {
+            const baseFee = 2.99;
+            const distance = calculateDistance(order);
+            const distanceFee = distance * 0.50;
+            const orderValue = order.total || 15;
+            const orderValueFee = orderValue * 0.10;
+            
+            const totalFee = baseFee + distanceFee + orderValueFee;
+            return Math.min(totalFee, 15);
+        }
+
+        function calculateDistance(order) {
+            return (Math.random() * 4.5 + 0.5).toFixed(1);
+        }
+
+        function estimatePrepTime(order) {
+            return 15 + (order.items ? order.items.length * 2 : 0);
+        }
+
+        function getRestaurantName(order) {
+            return order.restaurantName || 'Local Restaurant';
+        }
+
+        function getRestaurantAddress(order) {
+            return order.restaurantAddress || '123 Restaurant St';
+        }
+
+        window.acceptDelivery = async function(orderId, deliveryFee) {
+            if (!currentDriver || !isOnline) {
+                showMessage('dashboard-message', 'You must be online to accept deliveries', 'error');
+                return;
+            }
+
+            if (activeDelivery) {
+                showMessage('dashboard-message', 'You already have an active delivery', 'error');
+                return;
+            }
+
+            console.log('Accepting delivery:', orderId);
+            
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    driverId: currentDriver.uid,
+                    driverName: driverInfo.name,
+                    status: 'accepted',
+                    acceptedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    deliveryFee: deliveryFee
+                });
+
+                activeDelivery = {
+                    id: orderId,
+                    fee: deliveryFee,
+                    status: 'accepted'
+                };
+
+                await db.collection('drivers').doc(currentDriver.uid).update({
+                    status: 'on_delivery',
+                    currentOrderId: orderId
+                });
+
+                availableDeliveries = availableDeliveries.filter(d => d.id !== orderId);
+                renderAvailableDeliveries();
+
+                showActiveDelivery(orderId);
+
+                showMessage('dashboard-message', 'Delivery accepted!', 'success');
+
+            } catch (error) {
+                console.error('Error accepting delivery:', error);
+                showMessage('dashboard-message', 'Error: ' + error.message, 'error');
+            }
+        };
+
+        window.declineDelivery = function(orderId) {
+            availableDeliveries = availableDeliveries.filter(d => d.id !== orderId);
+            renderAvailableDeliveries();
+            showMessage('dashboard-message', 'Delivery declined', 'info');
+        };
+
+        // ===== ACTIVE DELIVERY FUNCTIONS =====
+        async function checkActiveDelivery() {
+            if (!currentDriver) return;
+
+            try {
+                const activeOrders = await db.collection('orders')
+                    .where('driverId', '==', currentDriver.uid)
+                    .where('status', 'in', ['accepted', 'picked_up', 'on_the_way'])
+                    .limit(1)
+                    .get();
+                
+                if (!activeOrders.empty) {
+                    const orderDoc = activeOrders.docs[0];
+                    activeDelivery = {
+                        id: orderDoc.id,
+                        ...orderDoc.data()
+                    };
+                    showActiveDelivery(orderDoc.id);
+                }
+            } catch (error) {
+                console.error('Error checking active delivery:', error);
+            }
+        }
+
+        async function showActiveDelivery(orderId) {
+            try {
+                const orderDoc = await db.collection('orders').doc(orderId).get();
+                if (!orderDoc.exists) return;
+
+                const order = orderDoc.data();
+                activeDelivery = { id: orderId, ...order };
+
+                document.getElementById('active-delivery-container').classList.remove('hidden');
+                document.getElementById('active-delivery-pay').textContent = (order.deliveryFee || calculateDeliveryFee(order)).toFixed(2);
+                
+                document.getElementById('pickup-name').textContent = getRestaurantName(order);
+                document.getElementById('pickup-address').textContent = getRestaurantAddress(order);
+                document.getElementById('dropoff-name').textContent = order.customerName || 'Customer';
+                document.getElementById('dropoff-address').textContent = order.deliveryAddress || 'Address not provided';
+                
+                document.getElementById('order-number').textContent = order.orderNumber || orderId.substring(0, 8);
+                document.getElementById('delivery-time').textContent = estimatePrepTime(order) + ' min';
+                document.getElementById('delivery-distance').textContent = calculateDistance(order) + ' mi';
+                
+                updateProgressSteps(order.status || 'accepted');
+                
+            } catch (error) {
+                console.error('Error showing active delivery:', error);
+            }
+        }
+
+        async function startPickup() {
+            if (!activeDelivery) return;
+
+            try {
+                await db.collection('orders').doc(activeDelivery.id).update({
+                    status: 'picked_up',
+                    pickedUpAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                activeDelivery.status = 'picked_up';
+                updateProgressSteps('picked_up');
+                
+                showMessage('dashboard-message', 'Order picked up!', 'success');
+                
+            } catch (error) {
+                console.error('Error starting pickup:', error);
+                showMessage('dashboard-message', 'Error updating pickup status', 'error');
+            }
+        }
+
+        async function startDelivery() {
+            if (!activeDelivery) return;
+
+            try {
+                await db.collection('orders').doc(activeDelivery.id).update({
+                    status: 'on_the_way',
+                    startedDeliveryAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                activeDelivery.status = 'on_the_way';
+                updateProgressSteps('on_the_way');
+                
+                showMessage('dashboard-message', 'On the way to customer!', 'success');
+                
+            } catch (error) {
+                console.error('Error starting delivery:', error);
+                showMessage('dashboard-message', 'Error starting delivery', 'error');
+            }
+        }
+
+        async function completeDelivery() {
+            if (!activeDelivery) return;
+
+            console.log('Completing delivery:', activeDelivery.id);
+            
+            try {
+                const deliveryFee = activeDelivery.deliveryFee || calculateDeliveryFee(activeDelivery);
+                
+                await db.collection('orders').doc(activeDelivery.id).update({
+                    status: 'delivered',
+                    deliveredAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                const earningData = {
+                    driverId: currentDriver.uid,
+                    driverName: driverInfo.name,
+                    orderId: activeDelivery.id,
+                    orderNumber: activeDelivery.orderNumber || activeDelivery.id.substring(0, 8),
+                    amount: deliveryFee,
+                    date: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                await db.collection('driverEarnings').add(earningData);
+                
+                await updateDriverEarnings(deliveryFee);
+                
+                await db.collection('drivers').doc(currentDriver.uid).update({
+                    status: 'available',
+                    currentOrderId: null
+                });
+
+                activeDelivery = null;
+                
+                document.getElementById('active-delivery-container').classList.add('hidden');
+                
+                await loadDriverStats();
+                await loadAvailableDeliveries();
+                
+                showMessage('dashboard-message', `Delivery completed! +$${deliveryFee.toFixed(2)} earned`, 'success');
+                
+                addToEarningsHistory(earningData);
+                
+            } catch (error) {
+                console.error('Error completing delivery:', error);
+                showMessage('dashboard-message', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function updateDriverEarnings(amount) {
+            if (!currentDriver) return;
+
+            try {
+                const updateData = {
+                    totalEarnings: firebase.firestore.FieldValue.increment(amount),
+                    todayEarnings: firebase.firestore.FieldValue.increment(amount),
+                    totalDeliveries: firebase.firestore.FieldValue.increment(1),
+                    todayDeliveries: firebase.firestore.FieldValue.increment(1)
+                };
+
+                await db.collection('drivers').doc(currentDriver.uid).update(updateData);
+                
+                driverInfo.totalEarnings = (driverInfo.totalEarnings || 0) + amount;
+                driverInfo.todayEarnings = (driverInfo.todayEarnings || 0) + amount;
+                driverInfo.totalDeliveries = (driverInfo.totalDeliveries || 0) + 1;
+                driverInfo.todayDeliveries = (driverInfo.todayDeliveries || 0) + 1;
+                
+                updateDriverUI();
+                
+            } catch (error) {
+                console.error('Error updating driver earnings:', error);
+            }
+        }
+
+        function addToEarningsHistory(earning) {
+            const earningsList = document.getElementById('earnings-history-list');
+            if (!earningsList) return;
+            
+            const date = new Date();
+            const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const earningItem = document.createElement('div');
+            earningItem.className = 'earning-item';
+            earningItem.innerHTML = `
+                <div>
+                    <div style="font-weight: 600;">Order #${earning.orderNumber}</div>
+                    <div style="font-size: 0.8rem; color: var(--driver-charcoal);">Today, ${timeString}</div>
+                </div>
+                <div class="earning-amount">+$${earning.amount.toFixed(2)}</div>
+            `;
+            
+            if (earningsList.firstChild) {
+                earningsList.insertBefore(earningItem, earningsList.firstChild);
+            } else {
+                earningsList.appendChild(earningItem);
+            }
+        }
+
+        // ===== UI FUNCTIONS =====
         function showDashboard() {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('register-section').classList.add('hidden');
@@ -859,83 +1861,18 @@
             updateDriverUI();
         }
 
-        function showMessage(elementId, message, type) {
-            const element = typeof elementId === 'string' ? document.getElementById(elementId) : elementId;
-            if (!element) {
-                console.log("Message element not found:", elementId);
-                return;
-            }
-            
-            element.innerHTML = `
-                <div class="message ${type}-message">
-                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle'}"></i>
-                    ${message}
-                </div>
-            `;
-            element.classList.remove('hidden');
-
-            if (type !== 'info') {
-                setTimeout(() => {
-                    element.innerHTML = '';
-                    element.classList.add('hidden');
-                }, 5000);
+        function clearAvailableDeliveries() {
+            const deliveriesList = document.getElementById('deliveries-list');
+            if (deliveriesList) {
+                deliveriesList.innerHTML = `
+                    <div class="message info-message">
+                        <i class="fas fa-power-off"></i>
+                        You are currently offline. Go online to see available deliveries.
+                    </div>
+                `;
             }
         }
 
-        // ===== 9. INITIALIZE APP =====
-        window.onload = initDriverApp;
-
-        // ===== 10. EXPOSE FUNCTIONS TO GLOBAL SCOPE =====
-        // Make sure all button onclick functions are available globally
-        window.signInWithGoogle = signInWithGoogle;
-        window.loginDriver = loginDriver;
-        window.registerDriver = registerDriver;
-        window.showRegisterForm = showRegisterForm;
-        window.showLoginForm = showLoginForm;
-        window.toggleOnlineStatus = toggleOnlineStatus;
-        window.loadAvailableDeliveries = loadAvailableDeliveries;
-        window.acceptDelivery = acceptDelivery;
-        window.declineDelivery = function(orderId) {
-            availableDeliveries = availableDeliveries.filter(d => d.id !== orderId);
-            renderAvailableDeliveries();
-            showMessage('dashboard-message', 'Delivery declined', 'info');
-        };
-        window.startPickup = async function() {
-            if (!activeDelivery) return;
-            try {
-                await db.collection('orders').doc(activeDelivery.id).update({
-                    status: 'picked_up',
-                    pickedUpAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                activeDelivery.status = 'picked_up';
-                updateProgressSteps('picked_up');
-                showMessage('dashboard-message', 'Order picked up!', 'success');
-            } catch (error) {
-                console.error('Error starting pickup:', error);
-                showMessage('dashboard-message', 'Error updating pickup status', 'error');
-            }
-        };
-        window.startDelivery = async function() {
-            if (!activeDelivery) return;
-            try {
-                await db.collection('orders').doc(activeDelivery.id).update({
-                    status: 'on_the_way',
-                    startedDeliveryAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                activeDelivery.status = 'on_the_way';
-                updateProgressSteps('on_the_way');
-                showMessage('dashboard-message', 'On the way to customer!', 'success');
-            } catch (error) {
-                console.error('Error starting delivery:', error);
-                showMessage('dashboard-message', 'Error starting delivery', 'error');
-            }
-        };
-        window.completeDelivery = completeDelivery;
-        window.showEarnings = function() {
-            showMessage('dashboard-message', 'Weekly earnings: $' + (driverInfo.weeklyEarnings || 0).toFixed(2), 'info');
-        };
-
-        // Progress steps helper
         function updateProgressSteps(status) {
             const steps = ['step-accepted', 'step-pickup', 'step-delivery', 'step-complete'];
             steps.forEach(stepId => {
@@ -970,57 +1907,9 @@
             }
         }
 
-        function addToEarningsHistory(earning) {
-            const earningsList = document.getElementById('earnings-history-list');
-            if (!earningsList) return;
-            
-            const date = new Date();
-            const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const earningItem = document.createElement('div');
-            earningItem.className = 'earning-item';
-            earningItem.innerHTML = `
-                <div>
-                    <div style="font-weight: 600;">Order #${earning.orderNumber}</div>
-                    <div style="font-size: 0.8rem; color: var(--driver-charcoal);">Today, ${timeString}</div>
-                </div>
-                <div class="earning-amount">+$${earning.amount.toFixed(2)}</div>
-            `;
-            
-            if (earningsList.firstChild) {
-                earningsList.insertBefore(earningItem, earningsList.firstChild);
-            } else {
-                earningsList.appendChild(earningItem);
-            }
-            
-            while (earningsList.children.length > 10) {
-                earningsList.removeChild(earningsList.lastChild);
-            }
-        }
-
-        function clearAvailableDeliveries() {
-            const deliveriesList = document.getElementById('deliveries-list');
-            if (deliveriesList) {
-                deliveriesList.innerHTML = `
-                    <div class="message info-message">
-                        <i class="fas fa-power-off"></i>
-                        You are currently offline. Go online to see available deliveries.
-                    </div>
-                `;
-            }
-        }
-
-        // Active time tracking (simplified)
-        function startActiveTimeTracking() {
-            console.log("Starting active time tracking");
-        }
-
-        function stopActiveTimeTracking() {
-            console.log("Stopping active time tracking");
-        }
-
-        function updateActiveTime() {
-            // Simplified for now
+        function showEarnings() {
+            const weeklyEarnings = driverInfo.weeklyEarnings || 0;
+            showMessage('dashboard-message', `Weekly earnings: $${weeklyEarnings.toFixed(2)}`, 'info');
         }
 
         async function cancelActiveDelivery() {
@@ -1043,37 +1932,28 @@
             }
         }
 
-        function setupRealTimeListeners() {
-            if (!currentDriver) return;
-            console.log("Setting up real-time listeners");
-            
-            // Listen for driver info updates
-            db.collection('drivers').doc(currentDriver.uid)
-                .onSnapshot((doc) => {
-                    if (doc.exists) {
-                        driverInfo = doc.data();
-                        updateDriverUI();
-                    }
-                });
-        }
-
-        // Add logout button handler
-        setTimeout(() => {
-            const headerContent = document.querySelector('.header-content');
-            if (headerContent) {
-                const logoutBtn = document.createElement('button');
-                logoutBtn.className = 'btn btn-decline';
-                logoutBtn.style.cssText = 'padding: 0.5rem 1rem; font-size: 0.9rem; min-height: 40px; margin-left: 10px;';
-                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
-                logoutBtn.onclick = logoutDriver;
-                logoutBtn.title = 'Logout';
-                
-                const driverStatus = document.getElementById('driver-status');
-                if (driverStatus) {
-                    driverStatus.appendChild(logoutBtn);
-                }
+        function showMessage(elementId, message, type) {
+            const element = typeof elementId === 'string' ? document.getElementById(elementId) : elementId;
+            if (!element) {
+                console.log('Message element not found:', elementId);
+                return;
             }
-        }, 1000);
+            
+            element.innerHTML = `
+                <div class="message ${type}-message">
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            element.classList.remove('hidden');
+
+            if (type !== 'info') {
+                setTimeout(() => {
+                    element.innerHTML = '';
+                    element.classList.add('hidden');
+                }, 5000);
+            }
+        }
     </script>
 </body>
 </html>
